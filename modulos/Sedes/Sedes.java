@@ -34,7 +34,7 @@ public class Sedes extends javax.swing.JFrame {
     
     private void cargarDatosDesdeSQL() {
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-        modelo.setRowCount(0); // Limpiamos la tabla visual primero
+        modelo.setRowCount(0);
 
         try {
             Connection con = ConexionSQL.conectar(); 
@@ -42,12 +42,12 @@ public class Sedes extends javax.swing.JFrame {
             ResultSet rs = st.executeQuery("SELECT ID, Nombre, UbiGeo, AforoMaximo, Estado FROM Sedes");
 
             while (rs.next()) {
-                String id = rs.getString("ID"); // Ahora lee texto como SD-001
+                String id = rs.getString("ID"); 
                 String nombre = rs.getString("Nombre");
                 String ubiGeo = rs.getString("UbiGeo");
                 int aforo = rs.getInt("AforoMaximo");
                 
-                // Traductor: SQL devuelve número, la tabla muestra texto
+               
                 int estadoNumero = rs.getInt("Estado"); 
                 String estadoTexto = "";
                 if (estadoNumero == 0) estadoTexto = "Operativo";
@@ -555,6 +555,11 @@ public class Sedes extends javax.swing.JFrame {
             }
         });
         jTable1.getTableHeader().setReorderingAllowed(false);
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTable1);
 
         jbTRADUCIR.setText("TRADUCIR UBIGEO");
@@ -778,7 +783,7 @@ public class Sedes extends javax.swing.JFrame {
         formulario.setVisible(true);
         
         if (formulario.isFueGuardado()) {
-            // Ya no leemos arreglos ni txt, solo actualizamos desde la nube
+           
             cargarDatosDesdeSQL(); 
             
             jbEstado.setSelectedIndex(0); 
@@ -849,6 +854,34 @@ public class Sedes extends javax.swing.JFrame {
         OBJ.setVisible(true);
         this.dispose();
     }                                        
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {                                     
+        // 1. Obtenemos qué fila y qué columna se clicaron
+    int fila = jTable1.rowAtPoint(evt.getPoint());
+    int columna = jTable1.columnAtPoint(evt.getPoint());
+
+    // 2. Comprobamos si fue en la columna de los "..." (la columna 5)
+    if (columna == 5) {
+        // 3. Extraemos los datos de la fila seleccionada
+        String id = jTable1.getValueAt(fila, 0).toString();
+        String nombre = jTable1.getValueAt(fila, 1).toString();
+        String ubiGeo = jTable1.getValueAt(fila, 2).toString(); // Importante: pasamos también el UbiGeo
+        String aforo = jTable1.getValueAt(fila, 3).toString();
+        String estado = jTable1.getValueAt(fila, 4).toString();
+
+        // 4. Abrimos la ventana ModificarSede enviando los datos
+        // Asegúrate de que el constructor de ModificarSede reciba estos parámetros
+        ModificarSede ventana = new ModificarSede(this, true, id, nombre, aforo, estado);
+        ventana.setLocationRelativeTo(this);
+        ventana.setVisible(true);
+
+        // 5. Al cerrar, recargamos la tabla
+        if (ventana.isFueGuardado()) {
+            cargarDatosDesdeSQL();
+            aplicarFiltros();
+        }
+    }
+    }                                    
 
     /**
      * @param args the command line arguments
