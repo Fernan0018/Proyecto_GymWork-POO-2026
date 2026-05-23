@@ -28,6 +28,7 @@ public class Soporte extends javax.swing.JFrame {
         DefaultTableModel modelo = (DefaultTableModel) tablaTickets.getModel();
         trsFiltro = new TableRowSorter<>(modelo);
         tablaTickets.setRowSorter(trsFiltro);
+        configurarAnchoColumnas();
         cargarDatosDesdeSQL();
         actualizarKPIs();
         actualizarGraficoCategorias();
@@ -188,7 +189,33 @@ public class Soporte extends javax.swing.JFrame {
             return c; 
         }
     }
-    
+
+    private void configurarAnchoColumnas() {
+        if (tablaTickets.getColumnModel().getColumnCount() > 0) {
+            // 0: Ticket ID (Pequeño y fijo)
+            tablaTickets.getColumnModel().getColumn(0).setPreferredWidth(60);
+            tablaTickets.getColumnModel().getColumn(0).setMinWidth(60);
+            tablaTickets.getColumnModel().getColumn(0).setMaxWidth(60);
+
+            // 1: Asunto del Ticket (El más ancho)
+            tablaTickets.getColumnModel().getColumn(1).setPreferredWidth(350);
+
+            // 2: Remitente
+            tablaTickets.getColumnModel().getColumn(2).setPreferredWidth(150);
+
+            // 3: Categoria
+            tablaTickets.getColumnModel().getColumn(3).setPreferredWidth(120);
+
+            // 4: Prioridad
+            tablaTickets.getColumnModel().getColumn(4).setPreferredWidth(100);
+
+            // 5: Estado
+            tablaTickets.getColumnModel().getColumn(5).setPreferredWidth(100);
+
+            // 6: Acciones
+            tablaTickets.getColumnModel().getColumn(6).setPreferredWidth(120);
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
