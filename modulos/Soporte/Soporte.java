@@ -24,6 +24,7 @@ public class Soporte extends javax.swing.JFrame {
      */
     public Soporte() {
         initComponents();
+        jScrollPane1.getVerticalScrollBar().setUnitIncrement(16);
         this.setResizable(false);
         DefaultTableModel modelo = (DefaultTableModel) tablaTickets.getModel();
         trsFiltro = new TableRowSorter<>(modelo);
@@ -65,7 +66,7 @@ public class Soporte extends javax.swing.JFrame {
                 else if (estadoNum == 2) estadoTexto = "Resolved";
 
                 // Insertamos en la tabla visual
-                Object[] filaCargada = new Object[]{id, asunto, remitente, categoria, prioridadTexto, estadoTexto};
+                Object[] filaCargada = new Object[]{id, asunto, remitente, categoria, prioridadTexto, estadoTexto,"..."};
                 modelo.addRow(filaCargada);
             }
         } catch (SQLException e) {
@@ -189,7 +190,8 @@ public class Soporte extends javax.swing.JFrame {
             return c; 
         }
     }
-
+    
+   
     private void configurarAnchoColumnas() {
         if (tablaTickets.getColumnModel().getColumnCount() > 0) {
             // 0: Ticket ID (Pequeño y fijo)
@@ -649,17 +651,17 @@ public class Soporte extends javax.swing.JFrame {
 
         tablaTickets.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Ticket ID", "Asunto del Ticket", "Remitente", "Categoria", "Prioridad", "Estado"
+                "Ticket ID", "Asunto del Ticket", "Remitente", "Categoria", "Prioridad", "Estado", "Acciones"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -667,9 +669,13 @@ public class Soporte extends javax.swing.JFrame {
             }
         });
         tablaTickets.getTableHeader().setReorderingAllowed(false);
+        tablaTickets.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaTicketsMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(tablaTickets);
         if (tablaTickets.getColumnModel().getColumnCount() > 0) {
-            tablaTickets.getColumnModel().getColumn(0).setResizable(false);
             tablaTickets.getColumnModel().getColumn(1).setResizable(false);
             tablaTickets.getColumnModel().getColumn(2).setResizable(false);
             tablaTickets.getColumnModel().getColumn(3).setResizable(false);
@@ -698,9 +704,9 @@ public class Soporte extends javax.swing.JFrame {
                 .addGroup(PanelTicketLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCrearTicket))
-                .addGap(26, 26, 26)
+                .addGap(27, 27, 27)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(32, Short.MAX_VALUE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanelSeleccionTicketsLayout = new javax.swing.GroupLayout(jPanelSeleccionTickets);
@@ -740,6 +746,7 @@ public class Soporte extends javax.swing.JFrame {
         PanelSeleccionAnaliticas.setOpaque(false);
 
         jPanel7.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel7.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 0, 255)));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI Black", 2, 18)); // NOI18N
         jLabel3.setText("Distribucion de Tickets por Categoria");
@@ -842,14 +849,14 @@ public class Soporte extends javax.swing.JFrame {
             .addGroup(PanelSeleccionAnaliticasLayout.createSequentialGroup()
                 .addGap(127, 127, 127)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(178, Short.MAX_VALUE))
+                .addContainerGap(176, Short.MAX_VALUE))
         );
         PanelSeleccionAnaliticasLayout.setVerticalGroup(
             PanelSeleccionAnaliticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(PanelSeleccionAnaliticasLayout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
@@ -1033,6 +1040,35 @@ public class Soporte extends javax.swing.JFrame {
         OBJ.setVisible(true);
         this.dispose();;
     }                                      
+
+    private void tablaTicketsMouseClicked(java.awt.event.MouseEvent evt) {                                          
+        // 1. Identificamos en qué fila y columna hizo clic el usuario
+    int fila = tablaTickets.rowAtPoint(evt.getPoint());
+    int columna = tablaTickets.columnAtPoint(evt.getPoint());
+
+    // 2. Verificamos si clicó en la columna "Acciones" (Índice 6)
+    if (columna == 6) {
+        // 3. Extraemos todos los datos de esa fila
+        String id = tablaTickets.getValueAt(fila, 0).toString();
+        String asunto = tablaTickets.getValueAt(fila, 1).toString();
+        String remitente = tablaTickets.getValueAt(fila, 2).toString();
+        String categoria = tablaTickets.getValueAt(fila, 3).toString();
+        String prioridad = tablaTickets.getValueAt(fila, 4).toString();
+        String estado = tablaTickets.getValueAt(fila, 5).toString();
+
+        // 4. Abrimos la ventana ModificarTicket y le pasamos los datos
+        ModificarTicket ventana = new ModificarTicket(this, true, id, asunto, remitente, categoria, prioridad, estado);
+        ventana.setLocationRelativeTo(this);
+        ventana.setVisible(true);
+
+        // 5. Si la ventana guardó cambios al cerrarse, recargamos todo
+        if (ventana.isFueGuardado()) {
+            cargarDatosDesdeSQL();
+            actualizarKPIs();
+            actualizarGraficoCategorias();
+        }
+    }
+    }                                         
 
     /**
      * @param args the command line arguments
