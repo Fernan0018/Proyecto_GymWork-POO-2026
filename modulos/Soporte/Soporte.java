@@ -224,21 +224,21 @@ public class Soporte extends javax.swing.JFrame {
     }
     
     private void limpiarTicketsExpirados() {
-    // Buscamos los IDs en CONTROL_TIEMPOS que tengan 24 horas o más, y los borramos de SOPORTE
+    // Ahora buscamos en la tabla Tiempos_Ticket usando la HoraFin
     String sql = "DELETE FROM SOPORTE WHERE ID IN ("
-               + "SELECT ID FROM CONTROL_TIEMPOS "
-               + "WHERE DATEDIFF(HOUR, FechaResolucion, GETDATE()) >= 24)";
+               + "SELECT ID FROM Tiempos_Ticket "
+               + "WHERE DATEDIFF(HOUR, HoraFin, GETDATE()) >= 24)";
     
     try (Connection con = ConexionSQL.conectar();
          Statement st = con.createStatement()) {
         
         int filasBorradas = st.executeUpdate(sql);
         if (filasBorradas > 0) {
-            System.out.println("Mantenimiento automático: Se purgaron " + filasBorradas + " tickets resueltos hace más de 24h.");
+            System.out.println("Limpieza automática: " + filasBorradas + " tickets eliminados.");
         }
         
     } catch (SQLException e) {
-        System.out.println("Error en el mantenimiento de tickets: " + e.getMessage());
+        System.out.println("Error en la limpieza: " + e.getMessage());
     }
 }
     /**
