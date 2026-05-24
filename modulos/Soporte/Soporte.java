@@ -98,12 +98,12 @@ public class Soporte extends javax.swing.JFrame {
     int total = modelo.getRowCount();
     int pendientes = 0;
     int altaPrioridad = 0;
-    int Resueltos = 0;
+    int resueltos = 0;
 
+    // 1. Lógica original para contar los paneles básicos
     for (int i = 0; i < total; i++) {
-        String estado = modelo.getValueAt(i, 5).toString(); // Columna 5 es Estado
-        String prioridad = modelo.getValueAt(i, 4).toString(); // Columna 4 es Prioridad
-        String resuelto = modelo.getValueAt(i,5).toString();
+        String estado = modelo.getValueAt(i, 5).toString(); 
+        String prioridad = modelo.getValueAt(i, 4).toString(); 
 
         if (estado.equals("Open") || estado.equals("In Progress")) {
             pendientes++;
@@ -111,16 +111,39 @@ public class Soporte extends javax.swing.JFrame {
         if (prioridad.equals("Alta") && !estado.equals("Resolved")) {
             altaPrioridad++;
         }
-        if(resuelto.equals("Resolved")){
-            Resueltos++;
+        if (estado.equals("Resolved")) {
+            resueltos++;
         }
     }
 
-    // Actualizamos los JLabels en la interfaz
     lblTotal.setText(String.valueOf(total));
     lblPendientes.setText(String.valueOf(pendientes));
     lblPrioridadAlta.setText(String.valueOf(altaPrioridad));
-    lblResueltos.setText(String.valueOf(Resueltos));
+    lblResueltos.setText(String.valueOf(resueltos));
+
+    // 2. NUEVA LÓGICA: Calcular el Tiempo Promedio desde SQL
+    // AVG() suma todos los minutos y los divide entre la cantidad de tickets en Tiempos_Ticket
+    String sqlPromedio = "SELECT AVG(MinutosResolucion) AS Promedio FROM Tiempos_Ticket WHERE DATEDIFF(DAY, HoraFin, GETDATE()) = 0";
+    
+    try (Connection con = ConexionSQL.conectar();
+         Statement st = con.createStatement();
+         ResultSet rs = st.executeQuery(sqlPromedio)) {
+
+        if (rs.next()) {
+            int promedio = rs.getInt("Promedio");
+            
+            // Si no hay tickets resueltos, el promedio podría salir 0
+            if (resueltos == 0 || promedio == 0) {
+                lblPromedio.setText("0 min");
+            } else {
+                lblPromedio.setText(promedio + " min");
+            }
+        }
+
+    } catch (SQLException e) {
+        System.out.println("Error al calcular el promedio: " + e.getMessage());
+        lblPromedio.setText("N/A");
+    }
 }
     
     private void actualizarGraficoCategorias() {
@@ -311,6 +334,10 @@ public class Soporte extends javax.swing.JFrame {
         barSoftware = new javax.swing.JProgressBar();
         barRegistro = new javax.swing.JProgressBar();
         jLabel20 = new javax.swing.JLabel();
+        jPanel16 = new javax.swing.JPanel();
+        lblPromedio = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        jLabel34 = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -876,21 +903,65 @@ public class Soporte extends javax.swing.JFrame {
                 .addContainerGap(55, Short.MAX_VALUE))
         );
 
+        jPanel16.setBackground(new java.awt.Color(242, 255, 255));
+        jPanel16.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(220, 220, 220), 1, true));
+
+        lblPromedio.setFont(new java.awt.Font("Segoe UI Black", 1, 48)); // NOI18N
+        lblPromedio.setText("0");
+
+        jLabel25.setFont(new java.awt.Font("Segoe UI Emoji", 2, 12)); // NOI18N
+        jLabel25.setForeground(new java.awt.Color(153, 153, 153));
+        jLabel25.setText("Minutos por Ticket");
+
+        jLabel34.setFont(new java.awt.Font("Segoe UI Black", 1, 14)); // NOI18N
+        jLabel34.setText("Tiempo Promedio");
+
+        javax.swing.GroupLayout jPanel16Layout = new javax.swing.GroupLayout(jPanel16);
+        jPanel16.setLayout(jPanel16Layout);
+        jPanel16Layout.setHorizontalGroup(
+            jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel16Layout.createSequentialGroup()
+                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel16Layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblPromedio)))
+                    .addGroup(jPanel16Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel34)))
+                .addContainerGap(114, Short.MAX_VALUE))
+        );
+        jPanel16Layout.setVerticalGroup(
+            jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel16Layout.createSequentialGroup()
+                .addComponent(jLabel34)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblPromedio, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel25)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout PanelSeleccionAnaliticasLayout = new javax.swing.GroupLayout(PanelSeleccionAnaliticas);
         PanelSeleccionAnaliticas.setLayout(PanelSeleccionAnaliticasLayout);
         PanelSeleccionAnaliticasLayout.setHorizontalGroup(
             PanelSeleccionAnaliticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(PanelSeleccionAnaliticasLayout.createSequentialGroup()
-                .addGap(127, 127, 127)
+                .addGap(20, 20, 20)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(176, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         PanelSeleccionAnaliticasLayout.setVerticalGroup(
             PanelSeleccionAnaliticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(PanelSeleccionAnaliticasLayout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(27, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PanelSeleccionAnaliticasLayout.createSequentialGroup()
+                .addContainerGap(30, Short.MAX_VALUE)
+                .addGroup(PanelSeleccionAnaliticasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(22, 22, 22))
         );
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
@@ -1158,8 +1229,16 @@ public class Soporte extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -1168,6 +1247,10 @@ public class Soporte extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel12;
+    private javax.swing.JPanel jPanel13;
+    private javax.swing.JPanel jPanel14;
+    private javax.swing.JPanel jPanel15;
+    private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1183,8 +1266,12 @@ public class Soporte extends javax.swing.JFrame {
     private javax.swing.JLabel lblMAQUINAS2;
     private javax.swing.JLabel lblPendientes;
     private javax.swing.JLabel lblPrioridadAlta;
+    private javax.swing.JLabel lblPromedio;
     private javax.swing.JLabel lblREGISTRO2;
     private javax.swing.JLabel lblResueltos;
+    private javax.swing.JLabel lblResueltos1;
+    private javax.swing.JLabel lblResueltos2;
+    private javax.swing.JLabel lblResueltos3;
     private javax.swing.JLabel lblSEDES2;
     private javax.swing.JLabel lblSOPORTE2;
     private javax.swing.JLabel lblSUSCRIPCION2;
