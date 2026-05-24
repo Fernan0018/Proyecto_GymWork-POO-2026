@@ -39,8 +39,7 @@ public class Sedes extends javax.swing.JFrame {
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
         modelo.setRowCount(0);
 
-        try {
-            Connection con = ConexionSQL.conectar(); 
+        try(Connection con = ConexionSQL.conectar()){ 
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery("SELECT ID, Nombre, UbiGeo, AforoMaximo, Estado FROM Sedes");
 
