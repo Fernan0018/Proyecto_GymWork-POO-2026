@@ -26,10 +26,14 @@ public class Soporte extends javax.swing.JFrame {
         initComponents();
         jScrollPane1.getVerticalScrollBar().setUnitIncrement(16);
         this.setResizable(false);
+        java.time.LocalDate fechaActual = java.time.LocalDate.now();
+        java.time.format.DateTimeFormatter formato = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        lblFecha.setText(fechaActual.format(formato));
         DefaultTableModel modelo = (DefaultTableModel) tablaTickets.getModel();
         trsFiltro = new TableRowSorter<>(modelo);
         tablaTickets.setRowSorter(trsFiltro);
         configurarAnchoColumnas();
+        limpiarTicketsExpirados();
         cargarDatosDesdeSQL();
         actualizarKPIs();
         actualizarGraficoCategorias();
@@ -218,6 +222,25 @@ public class Soporte extends javax.swing.JFrame {
             tablaTickets.getColumnModel().getColumn(6).setPreferredWidth(120);
         }
     }
+    
+    private void limpiarTicketsExpirados() {
+    // Buscamos los IDs en CONTROL_TIEMPOS que tengan 24 horas o más, y los borramos de SOPORTE
+    String sql = "DELETE FROM SOPORTE WHERE ID IN ("
+               + "SELECT ID FROM CONTROL_TIEMPOS "
+               + "WHERE DATEDIFF(HOUR, FechaResolucion, GETDATE()) >= 24)";
+    
+    try (Connection con = ConexionSQL.conectar();
+         Statement st = con.createStatement()) {
+        
+        int filasBorradas = st.executeUpdate(sql);
+        if (filasBorradas > 0) {
+            System.out.println("Mantenimiento automático: Se purgaron " + filasBorradas + " tickets resueltos hace más de 24h.");
+        }
+        
+    } catch (SQLException e) {
+        System.out.println("Error en el mantenimiento de tickets: " + e.getMessage());
+    }
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -274,6 +297,7 @@ public class Soporte extends javax.swing.JFrame {
         btnCrearTicket = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tablaTickets = new javax.swing.JTable();
+        lblFecha = new javax.swing.JLabel();
         PanelSeleccionAnaliticas = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
@@ -709,28 +733,38 @@ public class Soporte extends javax.swing.JFrame {
                 .addContainerGap(31, Short.MAX_VALUE))
         );
 
+        lblFecha.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
+        lblFecha.setText("jLabel22");
+
         javax.swing.GroupLayout jPanelSeleccionTicketsLayout = new javax.swing.GroupLayout(jPanelSeleccionTickets);
         jPanelSeleccionTickets.setLayout(jPanelSeleccionTicketsLayout);
         jPanelSeleccionTicketsLayout.setHorizontalGroup(
             jPanelSeleccionTicketsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSeleccionTicketsLayout.createSequentialGroup()
-                .addGap(23, 23, 23)
                 .addGroup(jPanelSeleccionTicketsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(PanelTicket, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanelSeleccionTicketsLayout.createSequentialGroup()
-                        .addComponent(PanelTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(PanelPendientes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(PanelPrioridadAlta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblFecha))
+                    .addGroup(jPanelSeleccionTicketsLayout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addGroup(jPanelSeleccionTicketsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(PanelTicket, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanelSeleccionTicketsLayout.createSequentialGroup()
+                                .addComponent(PanelTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(PanelPendientes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(PanelPrioridadAlta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addGap(10, 10, 10))
         );
         jPanelSeleccionTicketsLayout.setVerticalGroup(
             jPanelSeleccionTicketsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelSeleccionTicketsLayout.createSequentialGroup()
-                .addGap(36, 36, 36)
+                .addGap(10, 10, 10)
+                .addComponent(lblFecha)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSeleccionTicketsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(PanelTotal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(PanelPendientes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1144,6 +1178,7 @@ public class Soporte extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblADMINISTRACION2;
+    private javax.swing.JLabel lblFecha;
     private javax.swing.JLabel lblINICIO2;
     private javax.swing.JLabel lblMAQUINAS2;
     private javax.swing.JLabel lblPendientes;
