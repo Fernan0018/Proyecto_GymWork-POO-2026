@@ -266,33 +266,68 @@ public class ModificarTicket extends javax.swing.JDialog {
     }// </editor-fold>                        
 
     private void btnGUARDARActionPerformed(java.awt.event.ActionEvent evt) {                                           
-        // 1. Identificamos qué estado eligió el usuario (Traducimos visual a SQL)
-    int estadoSQL = 0; // Por defecto asumimos 0 (Open)
+    int estadoSQL = 0; // 0 = Open
+    if (jRadioButton2.isSelected()) estadoSQL = 1; // In Progress
+    else if (jRadioButton3.isSelected()) estadoSQL = 2; // Resolved
+
+    String idTicket = txtIDTicket.getText();
+
+    // 1. Consulta para actualizar el estado del ticket
+    String sqlUpdateEstado = "UPDATE SOPORTE SET Estado = ? WHERE ID = ?";
     
-    if (jRadioButton2.isSelected()) {
-        estadoSQL = 1; // In Progress
-    } else if (jRadioButton3.isSelected()) {
-        estadoSQL = 2; // Resolved
+    // 2. Lógica inteligente para la tabla de Tiempos
+    String sqlTiempo = "";
+    
+    if (estadoSQL == 0) {
+        // OPEN: Reiniciamos el reloj borrando el registro
+        sqlTiempo = "DELETE FROM Tiempos_Ticket WHERE ID = ?";
+        
+    } else if (estadoSQL == 1) {
+        // IN PROGRESS: Iniciamos el reloj SOLO si no había empezado ya
+        sqlTiempo = "IF NOT EXISTS (SELECT 1 FROM Tiempos_Ticket WHERE ID = ?) " +
+                    "INSERT INTO Tiempos_Ticket (ID, HoraInicio) VALUES (?, GETDATE())";
+                    
+    } else if (estadoSQL == 2) {
+        // RESOLVED: Detenemos el reloj y calculamos los minutos. 
+        // (El ELSE cubre si pasaron de Open a Resolved de golpe)
+        sqlTiempo = "IF NOT EXISTS (SELECT 1 FROM Tiempos_Ticket WHERE ID = ?) " +
+                    "INSERT INTO Tiempos_Ticket (ID, HoraInicio, HoraFin, MinutosResolucion) VALUES (?, GETDATE(), GETDATE(), 0) " +
+                    "ELSE " +
+                    "UPDATE Tiempos_Ticket SET HoraFin = GETDATE(), MinutosResolucion = DATEDIFF(MINUTE, HoraInicio, GETDATE()) WHERE ID = ?";
     }
 
-    // 2. Consulta SQL: Solo modificamos la columna Estado donde el ID coincida
-    String sql = "UPDATE SOPORTE SET Estado = ? WHERE ID = ?";
+    try (Connection con = ConexionSQL.conectar()) {
+        con.setAutoCommit(false); // Iniciamos transacción segura
 
-    try (Connection con = ConexionSQL.conectar();
-         PreparedStatement pst = con.prepareStatement(sql)) {
+        // Actualizamos el Estado
+        try (PreparedStatement pstEstado = con.prepareStatement(sqlUpdateEstado)) {
+            pstEstado.setInt(1, estadoSQL);
+            pstEstado.setString(2, idTicket);
+            pstEstado.executeUpdate();
+        }
 
-        // Inyectamos el nuevo número de estado y el ID actual
-        pst.setInt(1, estadoSQL);
-        pst.setString(2, txtIDTicket.getText());
+        // Actualizamos los Tiempos
+        try (PreparedStatement pstTiempo = con.prepareStatement(sqlTiempo)) {
+            if (estadoSQL == 0) {
+                pstTiempo.setString(1, idTicket);
+            } else if (estadoSQL == 1) {
+                pstTiempo.setString(1, idTicket);
+                pstTiempo.setString(2, idTicket);
+            } else if (estadoSQL == 2) {
+                pstTiempo.setString(1, idTicket);
+                pstTiempo.setString(2, idTicket);
+                pstTiempo.setString(3, idTicket);
+            }
+            pstTiempo.executeUpdate();
+        }
 
-        pst.executeUpdate();
-
-        JOptionPane.showMessageDialog(this, "¡El estado del ticket se actualizó correctamente!");
-        fueGuardado = true; // Avisamos que sí hubo cambios
-        this.dispose();     // Cerramos la ventana
+        con.commit(); // Guardamos todo
+        JOptionPane.showMessageDialog(this, "¡Ticket actualizado correctamente!");
+        fueGuardado = true; 
+        this.dispose();     
 
     } catch (SQLException e) {
-        JOptionPane.showMessageDialog(this, "Error al actualizar el ticket en SQL: " + e.getMessage());
+        JOptionPane.showMessageDialog(this, "Error SQL: " + e.getMessage());
     }
     }                                          
 
