@@ -24,6 +24,9 @@ public class Sedes extends javax.swing.JFrame {
     public Sedes() {
         initComponents();
         this.setResizable(false);
+        java.time.LocalDate fechaActual = java.time.LocalDate.now();
+        java.time.format.DateTimeFormatter formato = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        lblFecha.setText(fechaActual.format(formato));
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
         trsFiltro = new TableRowSorter<>(modelo);
         jTable1.setRowSorter(trsFiltro);
@@ -203,6 +206,7 @@ public class Sedes extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         jbRegistro = new javax.swing.JButton();
+        lblFecha = new javax.swing.JLabel();
 
         jPanel2.setBackground(new java.awt.Color(204, 255, 255));
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -626,6 +630,9 @@ public class Sedes extends javax.swing.JFrame {
 
         jPanel6.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1035, 146));
 
+        lblFecha.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
+        lblFecha.setText("jLabel15");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -633,14 +640,18 @@ public class Sedes extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblFecha))
                 .addContainerGap(17, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 720, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(lblFecha)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(29, 29, 29))
         );
@@ -856,26 +867,22 @@ public class Sedes extends javax.swing.JFrame {
     }                                        
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {                                     
-        // 1. Obtenemos qué fila y qué columna se clicaron
+        
     int fila = jTable1.rowAtPoint(evt.getPoint());
     int columna = jTable1.columnAtPoint(evt.getPoint());
 
-    // 2. Comprobamos si fue en la columna de los "..." (la columna 5)
+    
     if (columna == 5) {
-        // 3. Extraemos los datos de la fila seleccionada
         String id = jTable1.getValueAt(fila, 0).toString();
         String nombre = jTable1.getValueAt(fila, 1).toString();
-        String ubiGeo = jTable1.getValueAt(fila, 2).toString(); // Importante: pasamos también el UbiGeo
+        String ubiGeo = jTable1.getValueAt(fila, 2).toString(); 
         String aforo = jTable1.getValueAt(fila, 3).toString();
         String estado = jTable1.getValueAt(fila, 4).toString();
-
-        // 4. Abrimos la ventana ModificarSede enviando los datos
-        // Asegúrate de que el constructor de ModificarSede reciba estos parámetros
+        
         ModificarSede ventana = new ModificarSede(this, true, id, nombre, aforo, estado);
         ventana.setLocationRelativeTo(this);
         ventana.setVisible(true);
 
-        // 5. Al cerrar, recargamos la tabla
         if (ventana.isFueGuardado()) {
             cargarDatosDesdeSQL();
             aplicarFiltros();
@@ -943,6 +950,7 @@ public class Sedes extends javax.swing.JFrame {
     private javax.swing.JButton jbTRADUCIR;
     private javax.swing.JLabel lblADMINISTRACION;
     private javax.swing.JLabel lblADMINISTRACION1;
+    private javax.swing.JLabel lblFecha;
     private javax.swing.JLabel lblINICIO1;
     private javax.swing.JLabel lblMAQUINAS;
     private javax.swing.JLabel lblMAQUINAS1;
