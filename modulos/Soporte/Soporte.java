@@ -26,6 +26,7 @@ public class Soporte extends javax.swing.JFrame {
         initComponents();
         jScrollPane1.getVerticalScrollBar().setUnitIncrement(16);
         this.setResizable(false);
+        inicializarRegistroDiario();
         java.time.LocalDate fechaActual = java.time.LocalDate.now();
         java.time.format.DateTimeFormatter formato = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
         lblFecha.setText(fechaActual.format(formato));
@@ -80,7 +81,20 @@ public class Soporte extends javax.swing.JFrame {
         // Mantiene tus colores en la columna de Prioridad
         tablaTickets.getColumnModel().getColumn(4).setCellRenderer(new RenderizadorPrioridad());
     }
-    
+    private void inicializarRegistroDiario() {
+    // La magia de SQL: "Si no existe la fecha de hoy, créala con promedio 0"
+    String sql = "IF NOT EXISTS (SELECT 1 FROM Registro_TiempoProm WHERE Fecha = CAST(GETDATE() AS DATE)) " +
+                 "INSERT INTO Registro_TiempoProm (Fecha, MinutosResolucionPromedio) VALUES (CAST(GETDATE() AS DATE), 0)";
+                 
+    try (Connection con = ConexionSQL.conectar();
+         java.sql.PreparedStatement pst = con.prepareStatement(sql)) {
+        
+        pst.executeUpdate();
+        
+    } catch (SQLException e) {
+        System.out.println("Error al inicializar la métrica diaria: " + e.getMessage());
+    }
+    }
     private void Filtro(){
         String textoBusqueda = txtBuscar.getText().trim();
         List<RowFilter<Object, Object>> filtros = new ArrayList<>();
@@ -365,6 +379,9 @@ public class Soporte extends javax.swing.JFrame {
         lblSUSCRIPCION2.setFont(new java.awt.Font("Sitka Text", 1, 18)); // NOI18N
         lblSUSCRIPCION2.setText("Suscripciones");
         lblSUSCRIPCION2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblSUSCRIPCION2MouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 lblSUSCRIPCION2MouseEntered(evt);
             }
@@ -377,6 +394,9 @@ public class Soporte extends javax.swing.JFrame {
         lblREGISTRO2.setFont(new java.awt.Font("Sitka Text", 1, 18)); // NOI18N
         lblREGISTRO2.setText("Registro");
         lblREGISTRO2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblREGISTRO2MouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 lblREGISTRO2MouseEntered(evt);
             }
@@ -389,6 +409,9 @@ public class Soporte extends javax.swing.JFrame {
         lblMAQUINAS2.setFont(new java.awt.Font("Sitka Text", 1, 18)); // NOI18N
         lblMAQUINAS2.setText("Estado de maquinas");
         lblMAQUINAS2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblMAQUINAS2MouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 lblMAQUINAS2MouseEntered(evt);
             }
@@ -417,6 +440,9 @@ public class Soporte extends javax.swing.JFrame {
         lblADMINISTRACION2.setFont(new java.awt.Font("Sitka Text", 1, 18)); // NOI18N
         lblADMINISTRACION2.setText("Módulo de administración");
         lblADMINISTRACION2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblADMINISTRACION2MouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 lblADMINISTRACION2MouseEntered(evt);
             }
@@ -1175,6 +1201,32 @@ public class Soporte extends javax.swing.JFrame {
     }
     }                                         
 
+    private void lblSUSCRIPCION2MouseClicked(java.awt.event.MouseEvent evt) {                                             
+        Admin_Panel OBJ1 = new Admin_Panel();
+        OBJ1.setVisible(true);
+        Suscripciones sus = new Suscripciones();
+        sus.setVisible(true);
+        this.dispose();
+    }                                            
+
+    private void lblREGISTRO2MouseClicked(java.awt.event.MouseEvent evt) {                                          
+        Registro_panel OBJ = new Registro_panel();
+        OBJ.setVisible(true);
+        this.dispose();
+    }                                         
+
+    private void lblMAQUINAS2MouseClicked(java.awt.event.MouseEvent evt) {                                          
+        Maquinas_panel OBJ = new Maquinas_panel();
+        OBJ.setVisible(true);
+        this.dispose();
+    }                                         
+
+    private void lblADMINISTRACION2MouseClicked(java.awt.event.MouseEvent evt) {                                                
+        Modulo OBJ = new Modulo();
+        OBJ.setVisible(true);
+        this.dispose();
+    }                                               
+
     /**
      * @param args the command line arguments
      */
@@ -1229,15 +1281,9 @@ public class Soporte extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
-    private javax.swing.JLabel jLabel31;
-    private javax.swing.JLabel jLabel32;
-    private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1247,9 +1293,6 @@ public class Soporte extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel12;
-    private javax.swing.JPanel jPanel13;
-    private javax.swing.JPanel jPanel14;
-    private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -1269,9 +1312,6 @@ public class Soporte extends javax.swing.JFrame {
     private javax.swing.JLabel lblPromedio;
     private javax.swing.JLabel lblREGISTRO2;
     private javax.swing.JLabel lblResueltos;
-    private javax.swing.JLabel lblResueltos1;
-    private javax.swing.JLabel lblResueltos2;
-    private javax.swing.JLabel lblResueltos3;
     private javax.swing.JLabel lblSEDES2;
     private javax.swing.JLabel lblSOPORTE2;
     private javax.swing.JLabel lblSUSCRIPCION2;
