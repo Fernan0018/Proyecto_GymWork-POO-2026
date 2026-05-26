@@ -233,7 +233,7 @@ public class RegistroSede extends javax.swing.JDialog {
         String EstadoTexto = cbEstado.getSelectedItem().toString().trim();
         String UbiGeoTexto = txtLocation.getText().trim();
         
-        // Validación del UbiGeo (Se mantiene intacta)
+      
         String NombreArchivo = "datos/UbiGeo.txt";
         boolean encontrado = false;
         File archivo = new File(NombreArchivo);
@@ -260,7 +260,7 @@ public class RegistroSede extends javax.swing.JDialog {
             return;
         }
         
-        // NUEVA VALIDACIÓN: Exige formato SD-001, SD-002, etc.
+        
         if(IDTexto.isEmpty() || !IDTexto.matches("SD-\\d{3}")){
             javax.swing.JOptionPane.showMessageDialog(this, "Por favor, ingresa un ID válido con el formato SD-001.", "Error de Validación", javax.swing.JOptionPane.ERROR_MESSAGE);
             txtID.requestFocus();
@@ -285,7 +285,6 @@ public class RegistroSede extends javax.swing.JDialog {
             return;
         }
         
-        // TRADUCTOR: De Texto a Número para la Base de Datos
         int estadoSQL = 0;
         if (EstadoTexto.equals("Operativo")) {
             estadoSQL = 0;
@@ -295,17 +294,17 @@ public class RegistroSede extends javax.swing.JDialog {
             estadoSQL = 2;
         }
 
-        // ENVIAMOS A SQL
+       
         String sql = "INSERT INTO Sedes (ID, Nombre, UbiGeo, AforoMaximo, Estado) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection con = ConexionSQL.conectar();
              PreparedStatement pst = con.prepareStatement(sql)) {
 
-            pst.setString(1, IDTexto); // El SD-001
+            pst.setString(1, IDTexto); 
             pst.setString(2, nombreTexto);
             pst.setString(3, UbiGeoTexto);
             pst.setInt(4, Integer.parseInt(aforoTexto));
-            pst.setInt(5, estadoSQL); // El número 0, 1 o 2
+            pst.setInt(5, estadoSQL);
 
             pst.executeUpdate();
 
