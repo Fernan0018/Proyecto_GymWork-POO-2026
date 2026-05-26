@@ -3,7 +3,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
-
+import java.sql.ResultSet;
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
@@ -28,26 +28,39 @@ public class ModificarTicket extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         this.setResizable(false);
+        
+        // 1. Mostrar los datos en las cajas de texto
         txtIDTicket.setText(id);
         txtAsuntoTicket.setText(asunto);
         txtRemitenteTicket.setText(remitente);
         txtCategoríaTicket.setText(categoria);
         txtPrioridadTicket.setText(prioridad);
         
-        // 2. ¡BLOQUEAR LA EDICIÓN! (Para que queden estáticos)
+        // 2. Bloquear la edición de los textos (esto ya lo tenías)
         txtIDTicket.setEditable(false);
         txtAsuntoTicket.setEditable(false);
         txtRemitenteTicket.setEditable(false);
         txtCategoríaTicket.setEditable(false);
         txtPrioridadTicket.setEditable(false);
         
-        // 3. Marcar el RadioButton correcto según el estado que venga de la tabla
+        // 3. Marcar el RadioButton correcto y aplicar el BLOQUEO
         if (estado.equals("Open")) {
             jRadioButton1.setSelected(true);
         } else if (estado.equals("In Progress")) {
             jRadioButton2.setSelected(true);
         } else if (estado.equals("Resolved")) {
             jRadioButton3.setSelected(true);
+            
+            // 4. ¡BLOQUEO DE SEGURIDAD!
+            // Desactivamos los botones circulares para que no puedan darles clic
+            jRadioButton1.setEnabled(false);
+            jRadioButton2.setEnabled(false);
+            jRadioButton3.setEnabled(false);
+            
+            // Desactivamos el botón de Guardar
+            btnGUARDAR.setEnabled(false); 
+            // Opcional: Le cambiamos el texto para que quede súper claro
+            btnGUARDAR.setText("Ticket Cerrado"); 
         }
     }
 
@@ -319,6 +332,30 @@ public class ModificarTicket extends javax.swing.JDialog {
                 pstTiempo.setString(3, idTicket);
             }
             pstTiempo.executeUpdate();
+        }
+        if (estadoSQL == 2) { 
+            // 1. Calculamos el nuevo promedio
+            String sqlCalcPromedio = "SELECT ISNULL(AVG(MinutosResolucion), 0) AS Promedio " +
+                                     "FROM Tiempos_Ticket " +
+                                     "WHERE DATEDIFF(DAY, HoraFin, GETDATE()) = 0";
+            int promedioActual = 0;
+            
+            try (PreparedStatement pstCalc = con.prepareStatement(sqlCalcPromedio);
+                 ResultSet rs = pstCalc.executeQuery()) {
+                if (rs.next()) {
+                    promedioActual = rs.getInt("Promedio");
+                }
+            }
+
+            // 2. ACTUALIZAMOS (UPDATE) la fila que le pertenece al día de hoy
+            String sqlUpdateRegistro = "UPDATE Registro_TiempoProm " +
+                                       "SET MinutosResolucionPromedio = ? " +
+                                       "WHERE Fecha = CAST(GETDATE() AS DATE)";
+                                       
+            try (PreparedStatement pstUpdate = con.prepareStatement(sqlUpdateRegistro)) {
+                pstUpdate.setInt(1, promedioActual);
+                pstUpdate.executeUpdate();
+            }
         }
 
         con.commit(); // Guardamos todo
