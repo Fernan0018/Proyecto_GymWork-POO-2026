@@ -250,7 +250,7 @@ public class RegistroTicket extends javax.swing.JDialog {
 
             javax.swing.JOptionPane.showMessageDialog(this, "¡Ticket " + nuevoTicketID + " creado exitosamente!");
             
-            datosNuevoTicket = new Object[]{nuevoTicketID, AsuntoTest, RemitenteTest, CategoriaTest, PrioridadTest, "Open"};
+            datosNuevoTicket = new Object[]{nuevoTicketID, AsuntoTest, RemitenteTest, CategoriaTest, PrioridadTest, "Open","..."};
             FueGuardado = true;
             this.dispose();
 
