@@ -371,6 +371,9 @@ public class Sedes extends javax.swing.JFrame {
         lblSUSCRIPCION1.setFont(new java.awt.Font("Sitka Text", 1, 18)); // NOI18N
         lblSUSCRIPCION1.setText("Suscripciones");
         lblSUSCRIPCION1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblSUSCRIPCION1MouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 lblSUSCRIPCION1MouseEntered(evt);
             }
@@ -383,6 +386,9 @@ public class Sedes extends javax.swing.JFrame {
         lblREGISTRO1.setFont(new java.awt.Font("Sitka Text", 1, 18)); // NOI18N
         lblREGISTRO1.setText("Registro");
         lblREGISTRO1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblREGISTRO1MouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 lblREGISTRO1MouseEntered(evt);
             }
@@ -395,6 +401,9 @@ public class Sedes extends javax.swing.JFrame {
         lblMAQUINAS1.setFont(new java.awt.Font("Sitka Text", 1, 18)); // NOI18N
         lblMAQUINAS1.setText("Estado de maquinas");
         lblMAQUINAS1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblMAQUINAS1MouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 lblMAQUINAS1MouseEntered(evt);
             }
@@ -422,6 +431,9 @@ public class Sedes extends javax.swing.JFrame {
         lblADMINISTRACION1.setFont(new java.awt.Font("Sitka Text", 1, 18)); // NOI18N
         lblADMINISTRACION1.setText("Módulo de administración");
         lblADMINISTRACION1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblADMINISTRACION1MouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 lblADMINISTRACION1MouseEntered(evt);
             }
@@ -888,6 +900,32 @@ public class Sedes extends javax.swing.JFrame {
         }
     }
     }                                    
+
+    private void lblSUSCRIPCION1MouseClicked(java.awt.event.MouseEvent evt) {                                             
+        Admin_Panel OBJ1 = new Admin_Panel();
+        OBJ1.setVisible(true);
+        Suscripciones sus = new Suscripciones();
+        sus.setVisible(true);
+        this.dispose();
+    }                                            
+
+    private void lblREGISTRO1MouseClicked(java.awt.event.MouseEvent evt) {                                          
+        Modulo OBJ = new Modulo();
+        OBJ.setVisible(true);
+        this.dispose();
+    }                                         
+
+    private void lblMAQUINAS1MouseClicked(java.awt.event.MouseEvent evt) {                                          
+        Maquinas_panel OBJ = new Maquinas_panel();
+        OBJ.setVisible(true);
+        this.dispose();
+    }                                         
+
+    private void lblADMINISTRACION1MouseClicked(java.awt.event.MouseEvent evt) {                                                
+        Modulo OBJ = new Modulo();
+        OBJ.setVisible(true);
+        this.dispose();
+    }                                               
 
     /**
      * @param args the command line arguments
