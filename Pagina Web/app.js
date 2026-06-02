@@ -26,11 +26,16 @@ inputs.forEach(input => {
 });
 
 // Capturamos el formulario
+// Capturamos el formulario y el nuevo div de error
 const form = document.getElementById('formLogin');
+const mensajeError = document.getElementById('mensajeError'); 
 
 form.addEventListener('submit', async function(evento) {
     // 1. Evitamos que la página se recargue
     evento.preventDefault(); 
+
+    // Ocultamos el mensaje de error cada vez que se intenta iniciar sesión
+    mensajeError.style.display = 'none';
 
     // 2. Extraemos los valores de las cajas de texto
     const usuarioTexto = document.getElementById('username').value.trim();
@@ -38,19 +43,19 @@ form.addEventListener('submit', async function(evento) {
 
     // 3. Validación básica (Frontend)
     if (usuarioTexto === "" || claveTexto === "") {
-        alert("Por favor, completa todos los campos.");
-        return; // Detiene la ejecución si falta algo
+        mensajeError.textContent = "Por favor, completa todos los campos.";
+        mensajeError.style.display = 'block'; // Mostramos el error
+        return; 
     }
 
-    // 4. Preparamos los datos para enviarlos al servidor
+    // 4. Preparamos los datos
     const datosLogin = {
         username: usuarioTexto,
         password: claveTexto
     };
-    // Esto nos mostrará en el navegador qué estamos a punto de enviar
-    console.log("Datos a enviar desde JS:", datosLogin);
+
     try {
-        // 5. Enviamos los datos al Backend (Esta URL es un ejemplo de tu futuro servidor local)
+        // 5. Enviamos al Backend
         const respuesta = await fetch('http://localhost:8080/api/login', {
             method: 'POST',
             headers: {
@@ -59,20 +64,24 @@ form.addEventListener('submit', async function(evento) {
             body: JSON.stringify(datosLogin)
         });
 
-        // 6. Evaluamos la respuesta de la base de datos
+        // 6. Evaluamos la respuesta
         if (respuesta.ok) {
-            alert("¡Acceso concedido! Redirigiendo al sistema...");
-            // Guardamos el nombre de usuario localmente antes de irnos
-            localStorage.setItem('usuarioGymWork', usuarioTexto);
-    
-            // Redirigimos a tu nuevo menú principal
+            // ¡ÉXITO! Sin mensajes, redirección directa y silenciosa
             window.location.href = 'MenuPrincipal.html';
         } else {
-            alert("Usuario o contraseña incorrectos. Intenta de nuevo.");
+            // ERROR: Mostramos el cuadro de error visual
+            mensajeError.textContent = "Acceso inválido. Por favor, inténtelo otra vez.";
+            mensajeError.style.display = 'block'; 
+            // NUEVO: Limpiamos el campo de contraseña y le damos el foco
+            const inputPassword = document.getElementById('password');
+            inputPassword.value = ''; // Borra lo que estaba escrito
+            inputPassword.focus();    // Coloca el cursor parpadeando ahí
         }
 
     } catch (error) {
         console.error("Error al conectar con el servidor:", error);
-        alert("Error de conexión. Verifica que el servidor backend esté encendido.");
+        // Error de conexión también se muestra en el diseño
+        mensajeError.textContent = "Error de conexión. Verifica el servidor.";
+        mensajeError.style.display = 'block';
     }
 });
