@@ -62,8 +62,11 @@ form.addEventListener('submit', async function(evento) {
         // 6. Evaluamos la respuesta de la base de datos
         if (respuesta.ok) {
             alert("¡Acceso concedido! Redirigiendo al sistema...");
-            // Aquí harás el redireccionamiento a la pantalla principal del sistema
-            // window.location.href = 'dashboard.html';
+            // Guardamos el nombre de usuario localmente antes de irnos
+            localStorage.setItem('usuarioGymWork', usuarioTexto);
+    
+            // Redirigimos a tu nuevo menú principal
+            window.location.href = 'MenuPrincipal.html';
         } else {
             alert("Usuario o contraseña incorrectos. Intenta de nuevo.");
         }
