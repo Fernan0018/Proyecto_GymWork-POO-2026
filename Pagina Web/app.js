@@ -25,6 +25,12 @@ inputs.forEach(input => {
     });
 });
 
+// 3. Toggle para ver/ocultar contraseña
+document.getElementById('togglePassword').addEventListener('change', function() {
+    const passwordInput = document.getElementById('password');
+    passwordInput.type = this.checked ? 'text' : 'password';
+});
+
 // Capturamos el formulario
 // Capturamos el formulario y el nuevo div de error
 const form = document.getElementById('formLogin');

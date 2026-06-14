@@ -75,6 +75,27 @@
             transition: border-color 0.3s;
         }
         
+        /* 6. Opción "Ver contraseña" */
+        .show-password {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: -15px 0 20px 0;
+            font-size: 12px;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .show-password input[type="checkbox"] {
+            accent-color: #fcd535;
+            cursor: pointer;
+        }
+
+        .show-password label {
+            cursor: pointer;
+            user-select: none;
+        }
+
         /* 7. Botón amarillo */
         .btn-login {
             width: 100%;
@@ -135,6 +156,11 @@
             <div class="input-group">
                 <label for="password" id="label-pass">Password</label>
                 <input type="password" id="password" required>
+            </div>
+
+            <div class="show-password">
+                <input type="checkbox" id="togglePassword">
+                <label for="togglePassword">Ver contraseña</label>
             </div>
             
             <button type="submit" class="btn-login">LOGIN</button>
