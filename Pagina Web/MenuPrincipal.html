@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GymWork - Menú Principal</title>
+    <link rel="icon" type="image/png" href="GymWork_Logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* 1. Estilos generales */
@@ -114,6 +115,116 @@
         .show {
             display: block;
         }
+        /* 4. Estilos del Dashboard */
+        .dashboard-layout {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        .dashboard-main-content {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #121212;
+            overflow: hidden;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .background-circle {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 204, 0, 0.15);
+            box-shadow: 0 0 100px rgba(255, 204, 0, 0.05) inset;
+            z-index: 1;
+        }
+
+        .welcome-message-container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .greeting {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            color: #f0f0f0;
+        }
+
+        .status-message {
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            color: #ffffff;
+        }
+
+        .instruction {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: #aaaaaa;
+            line-height: 1.5;
+        }
+
+        /* 5. Barra lateral izquierda */
+        .sidebar {
+            width: 260px;
+            background-color: #1a1a1a;
+            border-right: 2px solid #fcd535;
+            padding: 30px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.4);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 24px;
+            color: #fcd535;
+            text-align: center;
+            padding: 10px 15px 25px;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 15px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 25px;
+            color: #cccccc;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+            border-left: 4px solid transparent;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item:hover {
+            background-color: rgba(252, 213, 53, 0.1);
+            color: #ffffff;
+            border-left-color: #fcd535;
+        }
+
+        .sidebar-item.active {
+            background-color: rgba(252, 213, 53, 0.15);
+            color: #fcd535;
+            border-left-color: #fcd535;
+        }
+
+        .sidebar-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -132,8 +243,54 @@
             </div>
         </div>
     </nav>
+
+    <div class="dashboard-layout">
+        <nav class="sidebar">
+            <div class="sidebar-header">MÓDULOS</div>
+            <div class="sidebar-item" data-modulo="suscripciones">
+                <img class="sidebar-icon" src="Suscripciones.png" alt="Suscripciones"> Suscripciones
+            </div>
+            <div class="sidebar-item" data-modulo="registro">
+                <img class="sidebar-icon" src="Registro.png" alt="Registro"> Registro
+            </div>
+            <div class="sidebar-item" data-modulo="sedes">
+                <img class="sidebar-icon" src="Sedes.png" alt="Sedes"> Sedes
+            </div>
+            <div class="sidebar-item" data-modulo="maquinas">
+                <img class="sidebar-icon" src="Maquinas.png" alt="Estado de Máquinas"> Estado de Máquinas
+            </div>
+            <div class="sidebar-item" data-modulo="soporte">
+                <img class="sidebar-icon" src="Soporte.png" alt="Soporte"> Soporte
+            </div>
+            <div class="sidebar-item" data-modulo="admin">
+                <img class="sidebar-icon" src="Administracion.png" alt="Módulo de Administración"> Módulo de Administración
+            </div>
+        </nav>
+
+        <div class="dashboard-main-content">
+            <div class="background-circle"></div>
+            <div class="welcome-message-container">
+                <h1 class="greeting" id="greeting"></h1>
+                <h2 class="status-message">El gimnasio está funcionando bien.</h2>
+                <p class="instruction">Seleccione una opción en el menú lateral<br>para gestionar los módulos.</p>
+            </div>
+        </div>
+    </div>
     
     <script>
+        // 0. Saludar según la hora del día
+        const hora = new Date().getHours();
+        let saludo;
+        if (hora >= 6 && hora < 12) {
+            saludo = 'Buenos días';
+        } else if (hora >= 12 && hora < 18) {
+            saludo = 'Buenas tardes';
+        } else {
+            saludo = 'Buenas noches';
+        }
+        const nombreUsuario = sessionStorage.getItem('username') || 'Administrador';
+        document.getElementById('greeting').innerText = `Hola, ${nombreUsuario}. ${saludo}`;
+
         const btnPerfil = document.getElementById('btnPerfil');
         const menuDesplegable = document.getElementById('menuDesplegable');
 
@@ -155,6 +312,22 @@
             // Redirige directamente al login sin mostrar ningún mensaje
             window.location.href = 'Login.html';
         }
+
+        // 4. Navegación por la barra lateral
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                const modulo = this.getAttribute('data-modulo');
+                // Mostrar mensaje indicando el módulo seleccionado
+                const greeting = document.getElementById('greeting');
+                const statusMsg = document.querySelector('.status-message');
+                const instruction = document.querySelector('.instruction');
+                greeting.innerText = `Módulo: ${this.textContent.trim()}`;
+                statusMsg.innerText = 'Cargando contenido...';
+                instruction.innerHTML = 'Use las opciones disponibles<br>para gestionar este módulo.';
+            });
+        });
     </script>
 
 </body>

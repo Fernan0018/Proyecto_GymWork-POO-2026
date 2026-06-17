@@ -72,6 +72,8 @@ form.addEventListener('submit', async function(evento) {
 
         // 6. Evaluamos la respuesta
         if (respuesta.ok) {
+            // Guardamos el nombre de usuario para mostrarlo en el MenuPrincipal
+            sessionStorage.setItem('username', usuarioTexto);
             // ¡ÉXITO! Sin mensajes, redirección directa y silenciosa
             window.location.href = 'MenuPrincipal.html';
         } else {

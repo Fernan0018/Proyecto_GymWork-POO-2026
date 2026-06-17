@@ -27,6 +27,10 @@ public class LoginController {
             return ResponseEntity.status(401).body("El usuario no existe");
         }
 
+        if (!usuarioWeb.getUsername().equals(usuarioDB.getUsername())) {
+            return ResponseEntity.status(401).body("El usuario no existe");
+        }
+
         if (usuarioWeb.getPassword().equals(usuarioDB.getPassword())) {
             return ResponseEntity.ok("Acceso concedido");
         } else {
