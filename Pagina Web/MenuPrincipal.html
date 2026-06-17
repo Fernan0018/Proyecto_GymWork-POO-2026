@@ -225,6 +225,104 @@
             object-fit: contain;
             flex-shrink: 0;
         }
+
+        /* 6. Tarjeta de perfil */
+        .profile-card {
+            display: none;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 40px 50px;
+            width: 500px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-card.visible {
+            display: block;
+        }
+
+        .profile-card h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: #fcd535;
+            margin: 0 0 30px 0;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .profile-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-field.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .profile-field label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .profile-field span {
+            font-size: 16px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .profile-close-btn {
+            margin-top: 30px;
+            grid-column: 1 / -1;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid #555;
+            color: #ccc;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-close-btn:hover {
+            border-color: #fcd535;
+            color: #fcd535;
+        }
+
+        .profile-edit-btn {
+            margin-top: 10px;
+            grid-column: 1 / -1;
+            padding: 12px;
+            background: #fcd535;
+            border: none;
+            color: #1a1a1a;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-edit-btn:hover {
+            background: #e6c12e;
+        }
     </style>
 </head>
 <body>
@@ -238,7 +336,7 @@
             </button>
             
             <div class="dropdown-menu" id="menuDesplegable">
-                <div class="dropdown-item disabled">VER PERFIL</div>
+                <div class="dropdown-item" onclick="verPerfil()">VER PERFIL</div>
                 <div class="dropdown-item" onclick="cerrarSesion()">CERRAR SESIÓN</div>
             </div>
         </div>
@@ -269,10 +367,41 @@
 
         <div class="dashboard-main-content">
             <div class="background-circle"></div>
-            <div class="welcome-message-container">
+            <div class="welcome-message-container" id="welcomeContainer">
                 <h1 class="greeting" id="greeting"></h1>
                 <h2 class="status-message">El gimnasio está funcionando bien.</h2>
                 <p class="instruction">Seleccione una opción en el menú lateral<br>para gestionar los módulos.</p>
+            </div>
+            <div class="profile-card" id="profileCard">
+                <h2>PERFIL DEL ADMINISTRADOR</h2>
+                <div class="profile-grid">
+                    <div class="profile-field">
+                        <label>Nombre</label>
+                        <span id="pNombre">—</span>
+                    </div>
+                    <div class="profile-field">
+                        <label>Apellidos</label>
+                        <span id="pApellidos">—</span>
+                    </div>
+                    <div class="profile-field">
+                        <label>Fecha de Nacimiento</label>
+                        <span id="pFechaNac">—</span>
+                    </div>
+                    <div class="profile-field">
+                        <label>Edad</label>
+                        <span id="pEdad">—</span>
+                    </div>
+                    <div class="profile-field full-width">
+                        <label>Correo Electrónico</label>
+                        <span id="pCorreo">—</span>
+                    </div>
+                    <div class="profile-field full-width">
+                        <label>Teléfono</label>
+                        <span id="pTelefono">—</span>
+                    </div>
+                    <button class="profile-close-btn" onclick="cerrarPerfil()">CERRAR</button>
+                    <button class="profile-edit-btn" onclick="editarPerfil()">EDITAR PERFIL</button>
+                </div>
             </div>
         </div>
     </div>
@@ -313,7 +442,50 @@
             window.location.href = 'Login.html';
         }
 
-        // 4. Navegación por la barra lateral
+        // 4. Ver perfil del administrador
+        async function verPerfil() {
+            const username = sessionStorage.getItem('username');
+            console.log('VER PERFIL - username:', username);
+            if (!username) return;
+
+            menuDesplegable.classList.remove('show');
+
+            try {
+                const respuesta = await fetch(`http://localhost:8080/api/perfil?username=${encodeURIComponent(username)}`);
+                console.log('Respuesta status:', respuesta.status);
+                if (!respuesta.ok) {
+                    const errorText = await respuesta.text();
+                    console.error('Error del servidor:', errorText);
+                    return;
+                }
+
+                const datos = await respuesta.json();
+                console.log('Datos recibidos:', datos);
+
+                document.getElementById('pNombre').textContent = datos.nombre;
+                document.getElementById('pApellidos').textContent = datos.apellidos;
+                document.getElementById('pFechaNac').textContent = datos.fechaNacimiento;
+                document.getElementById('pEdad').textContent = datos.edadActual + ' años';
+                document.getElementById('pCorreo').textContent = datos.correo;
+                document.getElementById('pTelefono').textContent = datos.telefono;
+
+                document.getElementById('welcomeContainer').style.display = 'none';
+                document.getElementById('profileCard').classList.add('visible');
+            } catch (e) {
+                console.error('Error de red:', e);
+            }
+        }
+
+        function cerrarPerfil() {
+            document.getElementById('profileCard').classList.remove('visible');
+            document.getElementById('welcomeContainer').style.display = '';
+        }
+
+        function editarPerfil() {
+            // Pendiente de implementar
+        }
+
+        // 5. Navegación por la barra lateral
         document.querySelectorAll('.sidebar-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));

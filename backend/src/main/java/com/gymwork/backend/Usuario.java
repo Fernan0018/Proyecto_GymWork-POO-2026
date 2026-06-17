@@ -8,19 +8,26 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "USUARIOS") // Obliga a Java a buscar en tu tabla real
+@Table(name = "USUARIOS")
 public class Usuario {
-    
+
     @Id
-    @Column(name = "usuario") // Obliga a Java a buscar en la columna 'usuario'
-    @JsonProperty("username") // Le dice que tu web lo envía como 'username'
+    @Column(name = "ID_Admin")
+    @JsonProperty("idAdmin")
+    private Integer idAdmin;
+
+    @Column(name = "usuario")
+    @JsonProperty("username")
     private String username;
-    
+
     @Column(name = "password")
     @JsonProperty("password")
-    private String password; 
+    private String password;
 
     public Usuario() {}
+
+    public Integer getIdAdmin() { return idAdmin; }
+    public void setIdAdmin(Integer idAdmin) { this.idAdmin = idAdmin; }
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
