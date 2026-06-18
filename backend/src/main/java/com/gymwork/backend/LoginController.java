@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -84,4 +85,32 @@ public class LoginController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/perfil")
+    public ResponseEntity<String> actualizarPerfil(@RequestBody PerfilUpdateRequest request) {
+        var datosOpt = datosAdminGWRepository.findById(request.dni());
+        if (datosOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Perfil no encontrado");
+        }
+
+        DatosAdminGW datos = datosOpt.get();
+        datos.setNombre(request.nombre());
+        datos.setApellidos(request.apellidos());
+        datos.setFechaNacimiento(LocalDate.parse(request.fechaNacimiento()));
+        datos.setCorreo(request.correo());
+        datos.setTelefono(request.telefono());
+
+        datosAdminGWRepository.save(datos);
+
+        return ResponseEntity.ok("Perfil editado correctamente");
+    }
+
+    record PerfilUpdateRequest(
+        String dni,
+        String nombre,
+        String apellidos,
+        String fechaNacimiento,
+        String correo,
+        String telefono
+    ) {}
 }
