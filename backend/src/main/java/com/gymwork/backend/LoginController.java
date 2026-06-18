@@ -31,12 +31,13 @@ public class LoginController {
 
     @PostMapping("/login")
     public String verificarLogin(@RequestParam String username, @RequestParam String password,
-                                  HttpSession session, RedirectAttributes redirectAttrs) {
+                                  HttpSession session, Model model) {
         UsuariosGW usuarioDB = usuariosGWRepository.findByUsername(username);
 
         if (usuarioDB == null || !usuarioDB.getPassword().equals(password)) {
-            redirectAttrs.addFlashAttribute("error", "Acceso inválido. Por favor, inténtelo otra vez.");
-            return "redirect:/login";
+            model.addAttribute("error", "Acceso inválido. Por favor, inténtelo otra vez.");
+            model.addAttribute("username", username);
+            return "login";
         }
 
         session.setAttribute("username", username);

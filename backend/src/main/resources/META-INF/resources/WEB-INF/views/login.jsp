@@ -116,7 +116,7 @@
         <form action="${pageContext.request.contextPath}/login" method="post">
             <div class="input-group">
                 <label for="username">Login</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" value="${username}" required>
             </div>
             <div class="input-group">
                 <label for="password">Password</label>
@@ -134,6 +134,9 @@
             const pwd = document.getElementById('password');
             pwd.type = this.checked ? 'text' : 'password';
         });
+        <c:if test="${not empty error}">
+        document.getElementById('password').focus();
+        </c:if>
     </script>
 </body>
 </html>
