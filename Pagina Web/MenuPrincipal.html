@@ -375,6 +375,10 @@
             <div class="profile-card" id="profileCard">
                 <h2>PERFIL DEL ADMINISTRADOR</h2>
                 <div class="profile-grid">
+                    <div class="profile-field full-width">
+                        <label>DNI</label>
+                        <span id="pDni">—</span>
+                    </div>
                     <div class="profile-field">
                         <label>Nombre</label>
                         <span id="pNombre">—</span>
@@ -462,6 +466,7 @@
                 const datos = await respuesta.json();
                 console.log('Datos recibidos:', datos);
 
+                document.getElementById('pDni').textContent = datos.dni;
                 document.getElementById('pNombre').textContent = datos.nombre;
                 document.getElementById('pApellidos').textContent = datos.apellidos;
                 document.getElementById('pFechaNac').textContent = datos.fechaNacimiento;

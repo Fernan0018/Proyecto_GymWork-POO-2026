@@ -1,5 +1,7 @@
 package com.gymwork.backend;
 
+import java.time.LocalDate;
+import java.time.Period;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,18 +16,18 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*")
 public class LoginController {
 
-    private final UsuarioRepository usuarioRepository;
-    private final DatosAdminRepository datosAdminRepository;
+    private final UsuariosGWRepository usuariosGWRepository;
+    private final DatosAdminGWRepository datosAdminGWRepository;
 
-    public LoginController(UsuarioRepository usuarioRepository, DatosAdminRepository datosAdminRepository) {
-        this.usuarioRepository = usuarioRepository;
-        this.datosAdminRepository = datosAdminRepository;
+    public LoginController(UsuariosGWRepository usuariosGWRepository, DatosAdminGWRepository datosAdminGWRepository) {
+        this.usuariosGWRepository = usuariosGWRepository;
+        this.datosAdminGWRepository = datosAdminGWRepository;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> verificarLogin(@RequestBody Usuario usuarioWeb) {
-        
-        Usuario usuarioDB = usuarioRepository.findByUsername(usuarioWeb.getUsername());
+    public ResponseEntity<String> verificarLogin(@RequestBody UsuariosGW usuarioWeb) {
+
+        UsuariosGW usuarioDB = usuariosGWRepository.findByUsername(usuarioWeb.getUsername());
 
         if (usuarioDB == null) {
             return ResponseEntity.status(401).body("El usuario no existe");
@@ -44,34 +46,38 @@ public class LoginController {
 
     @GetMapping("/perfil")
     public ResponseEntity<?> verPerfil(@RequestParam String username) {
-        Usuario usuarioDB = usuarioRepository.findByUsername(username);
+        UsuariosGW usuarioDB = usuariosGWRepository.findByUsername(username);
 
         if (usuarioDB == null) {
             return ResponseEntity.status(404).body("Usuario no encontrado");
         }
 
-        var datosOpt = datosAdminRepository.findByUsuarioUsername(username);
+        var datosOpt = datosAdminGWRepository.findByUsuarioUsername(username);
 
         if (datosOpt.isEmpty()) {
             return ResponseEntity.status(404).body("No se encontraron datos del perfil");
         }
 
-        DatosAdmin datos = datosOpt.get();
+        DatosAdminGW datos = datosOpt.get();
+
+        int edad = Period.between(datos.getFechaNacimiento(), LocalDate.now()).getYears();
 
         record PerfilResponse(
+            String dni,
             String nombre,
             String apellidos,
             String fechaNacimiento,
-            Integer edadActual,
+            int edadActual,
             String correo,
             String telefono
         ) {}
 
         PerfilResponse response = new PerfilResponse(
+            datos.getDni(),
             datos.getNombre(),
             datos.getApellidos(),
             datos.getFechaNacimiento().toString(),
-            datos.getEdadActual(),
+            edad,
             datos.getCorreo(),
             datos.getTelefono()
         );
