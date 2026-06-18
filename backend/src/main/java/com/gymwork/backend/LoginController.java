@@ -105,7 +105,7 @@ public class LoginController {
         return ResponseEntity.ok("Perfil editado correctamente");
     }
 
-    record PerfilUpdateRequest(
+    public record PerfilUpdateRequest(
         String dni,
         String nombre,
         String apellidos,
