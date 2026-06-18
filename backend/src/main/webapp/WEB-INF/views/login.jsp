@@ -1,17 +1,18 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GymWork - Acceso</title>
-    <link rel="icon" type="image/png" th:href="@{/GymWork_Logo.png}">
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/GymWork_Logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             padding: 0;
             font-family: 'Montserrat', sans-serif;
-            background-image: url('Fondo_Login.jpg');
             background-size: cover;
             background-position: center;
             height: 100vh;
@@ -105,12 +106,14 @@
         }
     </style>
 </head>
-<body>
+<body style="background-image: url('${pageContext.request.contextPath}/Fondo_Login.jpg'); background-size: cover; background-position: center;">
     <div class="login-box">
         <h2>Bienvenido a Gymwork</h2>
-        <img src="GymWork_Logo.png" alt="Logo GymWork" class="logo-gym">
-        <div th:if="${error}" class="mensaje-error" th:text="${error}">Error</div>
-        <form th:action="@{/login}" method="post">
+        <img src="${pageContext.request.contextPath}/GymWork_Logo.png" alt="Logo GymWork" class="logo-gym">
+        <c:if test="${not empty error}">
+            <div class="mensaje-error">${error}</div>
+        </c:if>
+        <form action="${pageContext.request.contextPath}/login" method="post">
             <div class="input-group">
                 <label for="username">Login</label>
                 <input type="text" id="username" name="username" required>
