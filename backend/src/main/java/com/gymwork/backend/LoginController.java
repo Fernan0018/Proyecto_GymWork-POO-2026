@@ -2,19 +2,15 @@ package com.gymwork.backend;
 
 import java.time.LocalDate;
 import java.time.Period;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.servlet.http.HttpSession;
 
-@RestController
-@RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@Controller
 public class LoginController {
 
     private final UsuariosGWRepository usuariosGWRepository;
@@ -25,92 +21,74 @@ public class LoginController {
         this.datosAdminGWRepository = datosAdminGWRepository;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<String> verificarLogin(@RequestBody UsuariosGW usuarioWeb) {
-
-        UsuariosGW usuarioDB = usuariosGWRepository.findByUsername(usuarioWeb.getUsername());
-
-        if (usuarioDB == null) {
-            return ResponseEntity.status(401).body("El usuario no existe");
+    @GetMapping({"/", "/login"})
+    public String login(HttpSession session) {
+        if (session.getAttribute("username") != null) {
+            return "redirect:/menu";
         }
-
-        if (!usuarioWeb.getUsername().equals(usuarioDB.getUsername())) {
-            return ResponseEntity.status(401).body("El usuario no existe");
-        }
-
-        if (usuarioWeb.getPassword().equals(usuarioDB.getPassword())) {
-            return ResponseEntity.ok("Acceso concedido");
-        } else {
-            return ResponseEntity.status(401).body("Contrasena incorrecta");
-        }
+        return "login";
     }
 
-    @GetMapping("/perfil")
-    public ResponseEntity<?> verPerfil(@RequestParam String username) {
+    @PostMapping("/login")
+    public String verificarLogin(@RequestParam String username, @RequestParam String password,
+                                  HttpSession session, RedirectAttributes redirectAttrs) {
         UsuariosGW usuarioDB = usuariosGWRepository.findByUsername(username);
 
-        if (usuarioDB == null) {
-            return ResponseEntity.status(404).body("Usuario no encontrado");
+        if (usuarioDB == null || !usuarioDB.getPassword().equals(password)) {
+            redirectAttrs.addFlashAttribute("error", "Acceso inválido. Por favor, inténtelo otra vez.");
+            return "redirect:/login";
+        }
+
+        session.setAttribute("username", username);
+        return "redirect:/menu";
+    }
+
+    @GetMapping("/menu")
+    public String menu(HttpSession session, Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
         }
 
         var datosOpt = datosAdminGWRepository.findByUsuarioUsername(username);
-
-        if (datosOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("No se encontraron datos del perfil");
+        if (datosOpt.isPresent()) {
+            DatosAdminGW datos = datosOpt.get();
+            model.addAttribute("perfil", datos);
+            int edad = Period.between(datos.getFechaNacimiento(), LocalDate.now()).getYears();
+            model.addAttribute("edad", edad);
         }
 
-        DatosAdminGW datos = datosOpt.get();
-
-        int edad = Period.between(datos.getFechaNacimiento(), LocalDate.now()).getYears();
-
-        record PerfilResponse(
-            String dni,
-            String nombre,
-            String apellidos,
-            String fechaNacimiento,
-            int edadActual,
-            String correo,
-            String telefono
-        ) {}
-
-        PerfilResponse response = new PerfilResponse(
-            datos.getDni(),
-            datos.getNombre(),
-            datos.getApellidos(),
-            datos.getFechaNacimiento().toString(),
-            edad,
-            datos.getCorreo(),
-            datos.getTelefono()
-        );
-
-        return ResponseEntity.ok(response);
+        model.addAttribute("username", username);
+        return "menu";
     }
 
-    @PutMapping("/perfil")
-    public ResponseEntity<String> actualizarPerfil(@RequestBody PerfilUpdateRequest request) {
-        var datosOpt = datosAdminGWRepository.findById(request.dni());
-        if (datosOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("Perfil no encontrado");
+    @PostMapping("/perfil/actualizar")
+    public String actualizarPerfil(@RequestParam String dni,
+                                    @RequestParam String nombre,
+                                    @RequestParam String apellidos,
+                                    @RequestParam String fechaNacimiento,
+                                    @RequestParam String correo,
+                                    @RequestParam String telefono,
+                                    RedirectAttributes redirectAttrs) {
+        var datosOpt = datosAdminGWRepository.findById(dni);
+        if (datosOpt.isPresent()) {
+            DatosAdminGW datos = datosOpt.get();
+            datos.setNombre(nombre);
+            datos.setApellidos(apellidos);
+            datos.setFechaNacimiento(LocalDate.parse(fechaNacimiento));
+            datos.setCorreo(correo);
+            datos.setTelefono(telefono);
+            datosAdminGWRepository.save(datos);
+            redirectAttrs.addFlashAttribute("exito", "PERFIL EDITADO CORRECTAMENTE");
+        } else {
+            redirectAttrs.addFlashAttribute("error", "Perfil no encontrado");
         }
-
-        DatosAdminGW datos = datosOpt.get();
-        datos.setNombre(request.nombre());
-        datos.setApellidos(request.apellidos());
-        datos.setFechaNacimiento(LocalDate.parse(request.fechaNacimiento()));
-        datos.setCorreo(request.correo());
-        datos.setTelefono(request.telefono());
-
-        datosAdminGWRepository.save(datos);
-
-        return ResponseEntity.ok("Perfil editado correctamente");
+        return "redirect:/menu";
     }
 
-    public record PerfilUpdateRequest(
-        String dni,
-        String nombre,
-        String apellidos,
-        String fechaNacimiento,
-        String correo,
-        String telefono
-    ) {}
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
+    }
 }

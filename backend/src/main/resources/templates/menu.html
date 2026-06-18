@@ -1,33 +1,29 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GymWork - Menú Principal</title>
-    <link rel="icon" type="image/png" href="GymWork_Logo.png">
+    <link rel="icon" type="image/png" th:href="@{/GymWork_Logo.png}">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 1. Estilos generales */
         body {
             margin: 0;
             padding: 0;
             font-family: 'Montserrat', sans-serif;
-            background-color: #0f0f0f; /* Fondo oscuro liso */
+            background-color: #0f0f0f;
             color: white;
         }
-
-        /* 2. Barra de navegación superior */
         .navbar {
             background-color: #1a1a1a;
             padding: 15px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 3px solid #fcd535; /* Línea amarilla estilo Gold's Gym */
+            border-bottom: 3px solid #fcd535;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             position: relative;
         }
-
         .navbar h1 {
             font-family: 'Bebas Neue', sans-serif;
             margin: 0;
@@ -35,18 +31,14 @@
             color: #fcd535;
             letter-spacing: 2px;
         }
-
-        /* 3. Contenedor del Perfil y Dropdown */
         .profile-container {
             position: relative;
             display: inline-block;
         }
-
-        /* Botón del icono de perfil */
         .profile-btn {
-            background: #000; /* Fondo negro para que coincida con tu imagen */
+            background: #000;
             border: 2px solid #555;
-            border-radius: 50%; /* Lo hace completamente circular */
+            border-radius: 50%;
             width: 45px;
             height: 45px;
             display: flex;
@@ -55,28 +47,22 @@
             cursor: pointer;
             transition: all 0.3s ease;
             padding: 0;
-            overflow: hidden; /* IMPORTANTE: Corta las esquinas de la imagen si es cuadrada */
+            overflow: hidden;
         }
-
-        /* Ajustes para la imagen del perfil */
         .profile-btn img {
             width: 100%;
             height: 100%;
-            object-fit: cover; 
-            transform: scale(1.15); /* 👈 Hacemos zoom para ocultar el margen blanco de la imagen */
+            object-fit: cover;
+            transform: scale(1.15);
         }
-
-        /* Efecto Hover en el borde del botón de perfil */
         .profile-btn:hover {
-            border-color: #fcd535; /* El borde se vuelve amarillo al pasar el mouse */
+            border-color: #fcd535;
         }
-
-        /* Menú desplegable (oculto por defecto) */
         .dropdown-menu {
-            display: none; 
+            display: none;
             position: absolute;
             right: 0;
-            top: 55px; /* Separación respecto a la barra */
+            top: 55px;
             background-color: #1a1a1a;
             min-width: 160px;
             box-shadow: 0px 8px 16px rgba(0,0,0,0.6);
@@ -85,8 +71,6 @@
             z-index: 1000;
             overflow: hidden;
         }
-
-        /* Elementos dentro del menú */
         .dropdown-item {
             color: white;
             padding: 12px 16px;
@@ -96,31 +80,23 @@
             font-weight: bold;
             transition: background 0.2s, color 0.2s;
             cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'Montserrat', sans-serif;
         }
-
-        /* Efecto hover para las opciones activas */
-        .dropdown-item:hover:not(.disabled) {
+        .dropdown-item:hover {
             background-color: #fcd535;
             color: black;
         }
-
-        /* Opción deshabilitada (Ver Perfil) */
-        .dropdown-item.disabled {
-            color: #555;
-            cursor: not-allowed;
-            background-color: #151515;
-        }
-
-        /* Clase auxiliar para mostrar el menú con JavaScript */
         .show {
             display: block;
         }
-        /* 4. Estilos del Dashboard */
         .dashboard-layout {
             display: flex;
             height: calc(100vh - 80px);
         }
-
         .dashboard-main-content {
             position: relative;
             flex: 1;
@@ -132,7 +108,6 @@
             color: #ffffff;
             font-family: 'Montserrat', sans-serif;
         }
-
         .background-circle {
             position: absolute;
             width: 500px;
@@ -142,35 +117,29 @@
             box-shadow: 0 0 100px rgba(255, 204, 0, 0.05) inset;
             z-index: 1;
         }
-
         .welcome-message-container {
             position: relative;
             z-index: 2;
             text-align: center;
         }
-
         .greeting {
             font-size: 3rem;
             font-weight: 300;
             margin-bottom: 0.5rem;
             color: #f0f0f0;
         }
-
         .status-message {
             font-size: 2.5rem;
             font-weight: 400;
             margin-bottom: 2rem;
             color: #ffffff;
         }
-
         .instruction {
             font-size: 1.2rem;
             font-weight: 300;
             color: #aaaaaa;
             line-height: 1.5;
         }
-
-        /* 5. Barra lateral izquierda */
         .sidebar {
             width: 260px;
             background-color: #1a1a1a;
@@ -181,7 +150,6 @@
             box-shadow: 4px 0 10px rgba(0,0,0,0.4);
             overflow-y: auto;
         }
-
         .sidebar-header {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 24px;
@@ -192,7 +160,6 @@
             border-bottom: 1px solid #333;
             margin-bottom: 15px;
         }
-
         .sidebar-item {
             display: flex;
             align-items: center;
@@ -206,27 +173,22 @@
             border-left: 4px solid transparent;
             letter-spacing: 0.5px;
         }
-
         .sidebar-item:hover {
             background-color: rgba(252, 213, 53, 0.1);
             color: #ffffff;
             border-left-color: #fcd535;
         }
-
         .sidebar-item.active {
             background-color: rgba(252, 213, 53, 0.15);
             color: #fcd535;
             border-left-color: #fcd535;
         }
-
         .sidebar-icon {
             width: 28px;
             height: 28px;
             object-fit: contain;
             flex-shrink: 0;
         }
-
-        /* 6. Tarjeta de perfil */
         .profile-card {
             display: none;
             background-color: #1e1e1e;
@@ -238,11 +200,9 @@
             position: relative;
             z-index: 2;
         }
-
         .profile-card.visible {
             display: block;
         }
-
         .profile-card h2 {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 28px;
@@ -251,22 +211,18 @@
             text-align: center;
             letter-spacing: 2px;
         }
-
         .profile-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-
         .profile-field {
             display: flex;
             flex-direction: column;
         }
-
         .profile-field.full-width {
             grid-column: 1 / -1;
         }
-
         .profile-field label {
             font-size: 11px;
             color: #888;
@@ -274,13 +230,11 @@
             letter-spacing: 1px;
             margin-bottom: 4px;
         }
-
         .profile-field span {
             font-size: 16px;
             color: #fff;
             font-weight: 500;
         }
-
         .profile-close-btn {
             margin-top: 30px;
             grid-column: 1 / -1;
@@ -297,12 +251,10 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
         .profile-close-btn:hover {
             border-color: #fcd535;
             color: #fcd535;
         }
-
         .profile-edit-btn {
             margin-top: 10px;
             grid-column: 1 / -1;
@@ -319,12 +271,9 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
         .profile-edit-btn:hover {
             background: #e6c12e;
         }
-
-        /* 7. Tarjeta de edición */
         .edit-card {
             display: none;
             background-color: #1e1e1e;
@@ -336,11 +285,9 @@
             position: relative;
             z-index: 2;
         }
-
         .edit-card.visible {
             display: block;
         }
-
         .edit-card h2 {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 28px;
@@ -349,22 +296,18 @@
             text-align: center;
             letter-spacing: 2px;
         }
-
         .edit-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-
         .edit-field {
             display: flex;
             flex-direction: column;
         }
-
         .edit-field.full-width {
             grid-column: 1 / -1;
         }
-
         .edit-field label {
             font-size: 11px;
             color: #888;
@@ -372,7 +315,6 @@
             letter-spacing: 1px;
             margin-bottom: 4px;
         }
-
         .edit-field input {
             background: #2a2a2a;
             border: 1px solid #444;
@@ -384,24 +326,20 @@
             outline: none;
             transition: border-color 0.2s;
         }
-
         .edit-field input:focus {
             border-color: #fcd535;
         }
-
         .edit-field input[readonly] {
             background: #1a1a1a;
             color: #666;
             cursor: not-allowed;
         }
-
         .edit-buttons {
             display: flex;
             gap: 12px;
             grid-column: 1 / -1;
             margin-top: 20px;
         }
-
         .edit-buttons button {
             flex: 1;
             padding: 12px;
@@ -414,29 +352,23 @@
             letter-spacing: 1px;
             transition: all 0.2s;
         }
-
         .btn-save {
             background: #fcd535;
             border: none;
             color: #1a1a1a;
         }
-
         .btn-save:hover {
             background: #e6c12e;
         }
-
         .btn-cancel {
             background: transparent;
             border: 1px solid #555;
             color: #ccc;
         }
-
         .btn-cancel:hover {
             border-color: #fcd535;
             color: #fcd535;
         }
-
-        /* 8. Mensaje de éxito */
         .success-toast {
             display: none;
             position: fixed;
@@ -456,7 +388,9 @@
             z-index: 9999;
             animation: fadeInOut 2.5s ease forwards;
         }
-
+        .success-toast.show {
+            display: block;
+        }
         @keyframes fadeInOut {
             0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -466,18 +400,15 @@
     </style>
 </head>
 <body>
-
     <nav class="navbar">
         <h1>GYMWORK</h1>
-        
         <div class="profile-container">
             <button class="profile-btn" id="btnPerfil">
-                <img src="User_Profile.jpg" alt="Perfil"> 
+                <img src="User_Profile.jpg" alt="Perfil">
             </button>
-            
             <div class="dropdown-menu" id="menuDesplegable">
-                <div class="dropdown-item" onclick="verPerfil()">VER PERFIL</div>
-                <div class="dropdown-item" onclick="cerrarSesion()">CERRAR SESIÓN</div>
+                <button class="dropdown-item" onclick="verPerfil()">VER PERFIL</button>
+                <button class="dropdown-item" onclick="cerrarSesion()">CERRAR SESIÓN</button>
             </div>
         </div>
     </nav>
@@ -507,154 +438,119 @@
 
         <div class="dashboard-main-content">
             <div class="background-circle"></div>
+
             <div class="welcome-message-container" id="welcomeContainer">
                 <h1 class="greeting" id="greeting"></h1>
                 <h2 class="status-message">El gimnasio está funcionando bien.</h2>
                 <p class="instruction">Seleccione una opción en el menú lateral<br>para gestionar los módulos.</p>
             </div>
-            <div class="profile-card" id="profileCard">
+
+            <div class="profile-card" id="profileCard" th:if="${perfil != null}">
                 <h2>PERFIL DEL ADMINISTRADOR</h2>
                 <div class="profile-grid">
                     <div class="profile-field full-width">
                         <label>DNI</label>
-                        <span id="pDni">—</span>
+                        <span id="pDni" th:text="${perfil.dni}">—</span>
                     </div>
                     <div class="profile-field">
                         <label>Nombre</label>
-                        <span id="pNombre">—</span>
+                        <span id="pNombre" th:text="${perfil.nombre}">—</span>
                     </div>
                     <div class="profile-field">
                         <label>Apellidos</label>
-                        <span id="pApellidos">—</span>
+                        <span id="pApellidos" th:text="${perfil.apellidos}">—</span>
                     </div>
                     <div class="profile-field">
                         <label>Fecha de Nacimiento</label>
-                        <span id="pFechaNac">—</span>
+                        <span id="pFechaNac" th:text="${perfil.fechaNacimiento}">—</span>
                     </div>
                     <div class="profile-field">
                         <label>Edad</label>
-                        <span id="pEdad">—</span>
+                        <span id="pEdad" th:text="${edad} + ' años'">—</span>
                     </div>
                     <div class="profile-field full-width">
                         <label>Correo Electrónico</label>
-                        <span id="pCorreo">—</span>
+                        <span id="pCorreo" th:text="${perfil.correo}">—</span>
                     </div>
                     <div class="profile-field full-width">
                         <label>Teléfono</label>
-                        <span id="pTelefono">—</span>
+                        <span id="pTelefono" th:text="${perfil.telefono}">—</span>
                     </div>
                     <button class="profile-close-btn" onclick="cerrarPerfil()">CERRAR</button>
                     <button class="profile-edit-btn" onclick="editarPerfil()">EDITAR PERFIL</button>
                 </div>
             </div>
 
-            <div class="edit-card" id="editCard">
+            <div class="edit-card" id="editCard" th:if="${perfil != null}">
                 <h2>EDITAR PERFIL</h2>
-                <div class="edit-grid">
-                    <div class="edit-field full-width">
-                        <label>DNI</label>
-                        <input type="text" id="eDni" readonly>
+                <form th:action="@{/perfil/actualizar}" method="post">
+                    <div class="edit-grid">
+                        <div class="edit-field full-width">
+                            <label>DNI</label>
+                            <input type="text" name="dni" th:value="${perfil.dni}" readonly>
+                        </div>
+                        <div class="edit-field">
+                            <label>Nombre</label>
+                            <input type="text" name="nombre" th:value="${perfil.nombre}" required>
+                        </div>
+                        <div class="edit-field">
+                            <label>Apellidos</label>
+                            <input type="text" name="apellidos" th:value="${perfil.apellidos}" required>
+                        </div>
+                        <div class="edit-field">
+                            <label>Fecha de Nacimiento</label>
+                            <input type="date" name="fechaNacimiento" th:value="${perfil.fechaNacimiento}" required>
+                        </div>
+                        <div class="edit-field full-width">
+                            <label>Correo Electrónico</label>
+                            <input type="email" name="correo" th:value="${perfil.correo}" required>
+                        </div>
+                        <div class="edit-field full-width">
+                            <label>Teléfono</label>
+                            <input type="text" name="telefono" th:value="${perfil.telefono}" required>
+                        </div>
+                        <div class="edit-buttons">
+                            <button type="button" class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
+                            <button type="submit" class="btn-save">GUARDAR</button>
+                        </div>
                     </div>
-                    <div class="edit-field">
-                        <label>Nombre</label>
-                        <input type="text" id="eNombre">
-                    </div>
-                    <div class="edit-field">
-                        <label>Apellidos</label>
-                        <input type="text" id="eApellidos">
-                    </div>
-                    <div class="edit-field">
-                        <label>Fecha de Nacimiento</label>
-                        <input type="date" id="eFechaNac">
-                    </div>
-                    <div class="edit-field full-width">
-                        <label>Correo Electrónico</label>
-                        <input type="email" id="eCorreo">
-                    </div>
-                    <div class="edit-field full-width">
-                        <label>Teléfono</label>
-                        <input type="text" id="eTelefono">
-                    </div>
-                    <div class="edit-buttons">
-                        <button class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
-                        <button class="btn-save" onclick="guardarPerfil()">GUARDAR</button>
-                    </div>
-                </div>
+                </form>
             </div>
 
-            <div class="success-toast" id="successToast">PERFIL EDITADO CORRECTAMENTE</div>
+            <div class="success-toast show" id="successToast" th:if="${exito}" th:text="${exito}">PERFIL EDITADO CORRECTAMENTE</div>
         </div>
     </div>
-    
+
     <script>
-        // 0. Saludar según la hora del día
         const hora = new Date().getHours();
         let saludo;
-        if (hora >= 6 && hora < 12) {
-            saludo = 'Buenos días';
-        } else if (hora >= 12 && hora < 18) {
-            saludo = 'Buenas tardes';
-        } else {
-            saludo = 'Buenas noches';
-        }
-        const nombreUsuario = sessionStorage.getItem('username') || 'Administrador';
-        document.getElementById('greeting').innerText = `Hola, ${nombreUsuario}. ${saludo}`;
+        if (hora >= 6 && hora < 12) saludo = 'Buenos días';
+        else if (hora >= 12 && hora < 18) saludo = 'Buenas tardes';
+        else saludo = 'Buenas noches';
+        const nombreUsuario =/*[[${username}]]*/ 'Administrador';
+        document.getElementById('greeting').innerText = 'Hola, ' + nombreUsuario + '. ' + saludo;
 
         const btnPerfil = document.getElementById('btnPerfil');
         const menuDesplegable = document.getElementById('menuDesplegable');
 
-        // 1. Mostrar/Ocultar el menú al hacer clic en el botón de perfil
         btnPerfil.addEventListener('click', function(evento) {
-            evento.stopPropagation(); 
+            evento.stopPropagation();
             menuDesplegable.classList.toggle('show');
         });
 
-        // 2. Cerrar el menú automáticamente si el usuario hace clic en otra parte
         document.addEventListener('click', function() {
             if (menuDesplegable.classList.contains('show')) {
                 menuDesplegable.classList.remove('show');
             }
         });
 
-        // 3. Función para cerrar sesión y volver a la pantalla de Login silenciosamente
         function cerrarSesion() {
-            // Redirige directamente al login sin mostrar ningún mensaje
-            window.location.href = 'Login.html';
+            window.location.href = '/logout';
         }
 
-        // 4. Ver perfil del administrador
-        async function verPerfil() {
-            const username = sessionStorage.getItem('username');
-            console.log('VER PERFIL - username:', username);
-            if (!username) return;
-
-            menuDesplegable.classList.remove('show');
-
-            try {
-                const respuesta = await fetch(`http://localhost:8080/api/perfil?username=${encodeURIComponent(username)}`);
-                console.log('Respuesta status:', respuesta.status);
-                if (!respuesta.ok) {
-                    const errorText = await respuesta.text();
-                    console.error('Error del servidor:', errorText);
-                    return;
-                }
-
-                const datos = await respuesta.json();
-                console.log('Datos recibidos:', datos);
-
-                document.getElementById('pDni').textContent = datos.dni;
-                document.getElementById('pNombre').textContent = datos.nombre;
-                document.getElementById('pApellidos').textContent = datos.apellidos;
-                document.getElementById('pFechaNac').textContent = datos.fechaNacimiento;
-                document.getElementById('pEdad').textContent = datos.edadActual + ' años';
-                document.getElementById('pCorreo').textContent = datos.correo;
-                document.getElementById('pTelefono').textContent = datos.telefono;
-
-                document.getElementById('welcomeContainer').style.display = 'none';
-                document.getElementById('profileCard').classList.add('visible');
-            } catch (e) {
-                console.error('Error de red:', e);
-            }
+        function verPerfil() {
+            document.getElementById('welcomeContainer').style.display = 'none';
+            document.getElementById('profileCard').classList.add('visible');
         }
 
         function cerrarPerfil() {
@@ -663,16 +559,6 @@
         }
 
         function editarPerfil() {
-            document.getElementById('eDni').value = document.getElementById('pDni').textContent;
-            document.getElementById('eNombre').value = document.getElementById('pNombre').textContent;
-            document.getElementById('eApellidos').value = document.getElementById('pApellidos').textContent;
-
-            const fechaTexto = document.getElementById('pFechaNac').textContent;
-            document.getElementById('eFechaNac').value = fechaTexto;
-
-            document.getElementById('eCorreo').value = document.getElementById('pCorreo').textContent;
-            document.getElementById('eTelefono').value = document.getElementById('pTelefono').textContent;
-
             document.getElementById('profileCard').classList.remove('visible');
             document.getElementById('editCard').classList.add('visible');
         }
@@ -682,80 +568,26 @@
             document.getElementById('profileCard').classList.add('visible');
         }
 
-        async function guardarPerfil() {
-            const dni = document.getElementById('eDni').value.trim();
-            const nombre = document.getElementById('eNombre').value.trim();
-            const apellidos = document.getElementById('eApellidos').value.trim();
-            const fechaNacimiento = document.getElementById('eFechaNac').value;
-            const correo = document.getElementById('eCorreo').value.trim();
-            const telefono = document.getElementById('eTelefono').value.trim();
-
-            if (!nombre || !apellidos || !fechaNacimiento || !correo || !telefono) {
-                alert('Por favor, completa todos los campos.');
-                return;
-            }
-
-            try {
-                const respuesta = await fetch('http://localhost:8080/api/perfil', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dni, nombre, apellidos, fechaNacimiento, correo, telefono })
-                });
-
-                if (!respuesta.ok) {
-                    const errorText = await respuesta.text();
-                    alert('Error al guardar: ' + errorText);
-                    return;
-                }
-
-                document.getElementById('editCard').classList.remove('visible');
-                document.getElementById('profileCard').classList.add('visible');
-
-                document.getElementById('pDni').textContent = dni;
-                document.getElementById('pNombre').textContent = nombre;
-                document.getElementById('pApellidos').textContent = apellidos;
-                document.getElementById('pFechaNac').textContent = fechaNacimiento;
-
-                const fecha = new Date(fechaNacimiento + 'T00:00:00');
-                const hoy = new Date();
-                let edad = hoy.getFullYear() - fecha.getFullYear();
-                const mes = hoy.getMonth() - fecha.getMonth();
-                if (mes < 0 || (mes === 0 && hoy.getDate() < fecha.getDate())) {
-                    edad--;
-                }
-                document.getElementById('pEdad').textContent = edad + ' años';
-                document.getElementById('pCorreo').textContent = correo;
-                document.getElementById('pTelefono').textContent = telefono;
-
-                const toast = document.getElementById('successToast');
-                toast.style.display = 'block';
-                toast.style.animation = 'none';
-                toast.offsetHeight;
-                toast.style.animation = 'fadeInOut 2.5s ease forwards';
-                setTimeout(() => { toast.style.display = 'none'; }, 3000);
-
-            } catch (e) {
-                console.error('Error de red:', e);
-                alert('Error de conexión. Verifica el servidor.');
-            }
+        const toast = document.getElementById('successToast');
+        if (toast) {
+            setTimeout(function() {
+                toast.style.display = 'none';
+            }, 3000);
         }
 
-        // 5. Navegación por la barra lateral
-        document.querySelectorAll('.sidebar-item').forEach(item => {
+        document.querySelectorAll('.sidebar-item').forEach(function(item) {
             item.addEventListener('click', function() {
-                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.sidebar-item').forEach(function(i) { i.classList.remove('active'); });
                 this.classList.add('active');
-                const modulo = this.getAttribute('data-modulo');
-                // Mostrar mensaje indicando el módulo seleccionado
-                const greeting = document.getElementById('greeting');
-                const statusMsg = document.querySelector('.status-message');
-                const instruction = document.querySelector('.instruction');
-                greeting.innerText = `Módulo: ${this.textContent.trim()}`;
+                var modulo = this.getAttribute('data-modulo');
+                var greeting = document.getElementById('greeting');
+                var statusMsg = document.querySelector('.status-message');
+                var instruction = document.querySelector('.instruction');
+                greeting.innerText = 'Modulo: ' + this.textContent.trim();
                 statusMsg.innerText = 'Cargando contenido...';
-                instruction.innerHTML = 'Use las opciones disponibles<br>para gestionar este módulo.';
+                instruction.innerHTML = 'Use las opciones disponibles<br>para gestionar este modulo.';
             });
         });
     </script>
-
 </body>
 </html>

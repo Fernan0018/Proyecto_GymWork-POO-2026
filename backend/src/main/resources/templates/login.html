@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GymWork - Acceso</title>
-    <link rel="icon" type="image/png" href="GymWork_Logo.png">
+    <link rel="icon" type="image/png" th:href="@{/GymWork_Logo.png}">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <style> 
-        /* 1. Estilos base y fondo de pantalla completa */
+    <style>
         body {
             margin: 0;
             padding: 0;
             font-family: 'Montserrat', sans-serif;
-            background-image: url('Fondo_Login.jpg'); /* Aquí va tu imagen */
+            background-image: url('Fondo_Login.jpg');
             background-size: cover;
             background-position: center;
             height: 100vh;
@@ -20,10 +19,8 @@
             justify-content: center;
             align-items: center;
         }
-
-        /* 2. Caja principal oscura y semi-transparente */
         .login-box {
-            background: rgba(15, 15, 15, 0.85); /* Negro con 85% de opacidad */
+            background: rgba(15, 15, 15, 0.85);
             padding: 50px 40px;
             width: 350px;
             border-radius: 5px;
@@ -31,14 +28,11 @@
             color: white;
             box-shadow: 0 15px 25px rgba(0,0,0,0.8);
         }
-        /* Estilos para el logo de GymWork */
         .logo-gym {
-            width: 140px; /* Controla qué tan grande se ve */
-            display: block; /* Permite centrar la imagen */
-            margin: -20px auto 30px auto; /* Sube un poco el logo y lo separa del login */
+            width: 140px;
+            display: block;
+            margin: -20px auto 30px auto;
         }
-
-        /* 3. Título */
         .login-box h2 {
             font-family: 'Bebas Neue', sans-serif;
             margin-bottom: 40px;
@@ -46,37 +40,28 @@
             font-size: 28px;
             letter-spacing: 1px;
         }
-
-        /* 4. Contenedor de las cajas de texto */
         .input-group {
             position: relative;
             margin-bottom: 30px;
             text-align: left;
         }
-
         .input-group label {
             display: block;
             font-size: 11px;
             color: #888;
             margin-bottom: 5px;
             text-transform: uppercase;
-            transition: color 0.3s; /* Animación suave para JS */
         }
-
-        /* 5. Cajas de texto estilo "Línea inferior" */
         .input-group input {
             width: 100%;
             padding: 8px 0;
-            background: transparent; /* Fondo transparente */
+            background: transparent;
             border: none;
-            border-bottom: 1px solid #555; /* Solo línea abajo */
+            border-bottom: 1px solid #555;
             color: white;
             font-size: 16px;
             outline: none;
-            transition: border-color 0.3s;
         }
-        
-        /* 6. Opción "Ver contraseña" */
         .show-password {
             display: flex;
             align-items: center;
@@ -86,21 +71,17 @@
             color: #888;
             cursor: pointer;
         }
-
         .show-password input[type="checkbox"] {
             accent-color: #fcd535;
             cursor: pointer;
         }
-
         .show-password label {
             cursor: pointer;
             user-select: none;
         }
-
-        /* 7. Botón amarillo */
         .btn-login {
             width: 100%;
-            background: #fcd535; /* Amarillo Gold's Gym */
+            background: #fcd535;
             color: black;
             border: none;
             padding: 14px;
@@ -108,66 +89,48 @@
             font-size: 14px;
             cursor: pointer;
             border-radius: 2px;
-            transition: background 0.3s;
         }
-
         .btn-login:hover {
             background: #e6c12c;
         }
-
-        /* 8. Texto inferior */
-        .register-text {
-            margin-top: 30px;
-            font-size: 12px;
-            color: #ccc;
-        }
-
-        .register-text a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        /* 9. Estilos para el mensaje de error */
         .mensaje-error {
-            background-color: #8e8f3a; /* Fondo rosado/rojo claro */
-            color: #000000; /* Texto rojo oscuro */
+            background-color: #8e8f3a;
+            color: #000000;
             padding: 12px;
             margin-bottom: 20px;
             border-radius: 5px;
             font-size: 14px;
             text-align: left;
-            border: 1px solid #000000; /* Borde sutil */
+            border: 1px solid #000000;
         }
     </style>
 </head>
 <body>
-
     <div class="login-box">
         <h2>Bienvenido a Gymwork</h2>
         <img src="GymWork_Logo.png" alt="Logo GymWork" class="logo-gym">
-        <div id="mensajeError" class="mensaje-error" style="display: none;">
-            Acceso inválido. Por favor, inténtelo otra vez.
-        </div>
-        <form id="formLogin">
+        <div th:if="${error}" class="mensaje-error" th:text="${error}">Error</div>
+        <form th:action="@{/login}" method="post">
             <div class="input-group">
-                <label for="username" id="label-user">Login</label>
-                <input type="text" id="username" autocomplete="off" required>
+                <label for="username">Login</label>
+                <input type="text" id="username" name="username" required>
             </div>
-            
             <div class="input-group">
-                <label for="password" id="label-pass">Password</label>
-                <input type="password" id="password" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
             </div>
-
             <div class="show-password">
                 <input type="checkbox" id="togglePassword">
                 <label for="togglePassword">Ver contraseña</label>
             </div>
-            
             <button type="submit" class="btn-login">LOGIN</button>
         </form>
     </div>
-
-    <script src="app.js"></script>
+    <script>
+        document.getElementById('togglePassword').addEventListener('change', function() {
+            const pwd = document.getElementById('password');
+            pwd.type = this.checked ? 'text' : 'password';
+        });
+    </script>
 </body>
 </html>
