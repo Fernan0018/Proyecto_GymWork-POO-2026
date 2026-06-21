@@ -421,7 +421,8 @@
             <div class="sidebar-item" data-modulo="suscripciones">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Suscripciones"> Suscripciones
             </div>
-            <div class="sidebar-item" data-modulo="registro">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/registro'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Registro.png" alt="Registro"> Registro
             </div>
             <div class="sidebar-item" data-modulo="sedes">
