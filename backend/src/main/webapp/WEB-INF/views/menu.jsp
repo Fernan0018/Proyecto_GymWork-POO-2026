@@ -425,7 +425,8 @@
                 onclick="window.location.href='${pageContext.request.contextPath}/registro'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Registro.png" alt="Registro"> Registro
             </div>
-            <div class="sidebar-item" data-modulo="sedes">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/sedes'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Sedes.png" alt="Sedes"> Sedes
             </div>
             <div class="sidebar-item" data-modulo="maquinas">
