@@ -1,5 +1,7 @@
 package com.gymwork.backend;
 
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,14 +19,28 @@ public class SedesController {
 
     private final SedesGWRepository sedesRepository;
     private final UbiGeoRepository ubiGeoRepository;
+    private final UsuariosGWRepository usuariosRepository;
+    private final DatosAdminGWRepository datosAdminRepository;
 
-    public SedesController(SedesGWRepository sedesRepository, UbiGeoRepository ubiGeoRepository) {
+    public SedesController(SedesGWRepository sedesRepository, UbiGeoRepository ubiGeoRepository, UsuariosGWRepository usuariosRepository, DatosAdminGWRepository datosAdminRepository) {
         this.sedesRepository = sedesRepository;
         this.ubiGeoRepository = ubiGeoRepository;
+        this.usuariosRepository = usuariosRepository;
+        this.datosAdminRepository = datosAdminRepository;
     }
 
     @GetMapping("/sedes")
-    public String sedes(Model model) {
+    public String sedes(HttpSession session, Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username != null) {
+            var datosOpt = datosAdminRepository.findByUsuarioUsername(username);
+            if (datosOpt.isPresent()) {
+                DatosAdminGW datos = datosOpt.get();
+                model.addAttribute("perfil", datos);
+                int edad = Period.between(datos.getFechaNacimiento(), LocalDate.now()).getYears();
+                model.addAttribute("edad", edad);
+            }
+        }
         model.addAttribute("sedes", sedesRepository.findAll());
         model.addAttribute("ubigeos", ubiGeoRepository.findAll());
         return "sedes";
@@ -89,6 +107,41 @@ public class SedesController {
 
         sedesRepository.save(sede);
         redirect.addFlashAttribute("exito", "Sede actualizada correctamente");
+        return "redirect:/sedes";
+    }
+
+    @PostMapping("/sedes/eliminar")
+    public String eliminarSede(
+            @RequestParam Integer id,
+            @RequestParam String deletePassword,
+            HttpSession session,
+            RedirectAttributes redirect) {
+
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            redirect.addFlashAttribute("error", "Debe iniciar sesión");
+            return "redirect:/login";
+        }
+
+        UsuariosGW usuario = usuariosRepository.findByUsername(username);
+        if (usuario == null) {
+            redirect.addFlashAttribute("error", "Usuario no encontrado");
+            return "redirect:/sedes";
+        }
+
+        if (!usuario.getDeletePassword().equals(deletePassword)) {
+            redirect.addFlashAttribute("error", "Contraseña de eliminación incorrecta");
+            return "redirect:/sedes";
+        }
+
+        Optional<SedesGW> opt = sedesRepository.findById(id);
+        if (opt.isEmpty()) {
+            redirect.addFlashAttribute("error", "La sede no existe");
+            return "redirect:/sedes";
+        }
+
+        sedesRepository.delete(opt.get());
+        redirect.addFlashAttribute("exito", "Sede eliminada correctamente");
         return "redirect:/sedes";
     }
 }

@@ -58,6 +58,9 @@
             gap:15px;
             margin-bottom:25px;
         }
+        .module-actions input[type="text"]{
+            width:300px;
+        }
         .action-btn{
             background:#fcd535;
             color:#111;
@@ -69,6 +72,34 @@
         }
         .action-btn:hover{
             background:#e6c12e;
+        }
+        .action-btn-sm{
+            background:#fcd535;
+            color:#111;
+            border:none;
+            padding:6px 12px;
+            border-radius:6px;
+            font-weight:bold;
+            cursor:pointer;
+            font-size:12px;
+            margin:2px;
+        }
+        .action-btn-sm:hover{
+            background:#e6c12e;
+        }
+        .btn-danger-sm{
+            background:#dc3545;
+            color:#fff;
+            border:none;
+            padding:6px 12px;
+            border-radius:6px;
+            font-weight:bold;
+            cursor:pointer;
+            font-size:12px;
+            margin:2px;
+        }
+        .btn-danger-sm:hover{
+            background:#c82333;
         }
         .table-wrapper{
             max-height:400px;
@@ -656,8 +687,9 @@
                                         <td>${s.distrito}</td>
                                         <td>${s.estado}</td>
                                         <td>${s.aforo}</td>
-                                        <td>
-                                            <button class="action-btn" onclick="abrirModalModificar(${s.idSede}, '${s.nombreSede}', '${s.departamento}', '${s.distrito}', '${s.estado}', ${s.aforo})">&#9998; MODIFICAR</button>
+                                        <td style="white-space:nowrap;">
+                                            <button class="action-btn-sm" onclick="abrirModalModificar(${s.idSede}, '${s.nombreSede}', '${s.departamento}', '${s.distrito}', '${s.estado}', ${s.aforo})">&#9998; MOD</button>
+                                            <button class="btn-danger-sm" onclick="abrirModalEliminar(${s.idSede}, '${s.nombreSede}')">&#128465; ELIM</button>
                                         </td>
                                     </tr>
                                 </c:forEach>
@@ -736,83 +768,107 @@
                 </div>
             </div>
 
+            <div class="modal-overlay" id="modalEliminar">
+                <div class="modal-card" style="width:400px;">
+                    <h2>ELIMINAR SEDE</h2>
+                    <p style="text-align:center;color:#ccc;margin-bottom:20px;">
+                        ¿Está seguro de eliminar la sede <strong id="elimNombreSede" style="color:#fcd535;"></strong>?
+                    </p>
+                    <form id="formEliminar" action="${pageContext.request.contextPath}/sedes/eliminar" method="post">
+                        <input type="hidden" name="id" id="elimId">
+                        <div class="modal-field">
+                            <label>Contraseña de Eliminación (6 dígitos)</label>
+                            <input type="password" name="deletePassword" id="inputDeletePassword" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" required autocomplete="off">
+                        </div>
+                        <div class="modal-buttons">
+                            <button type="button" class="btn-cancel" onclick="cerrarModalEliminar()">CANCELAR</button>
+                            <button type="submit" class="btn-primary" style="background:#dc3545;">ELIMINAR</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <c:if test="${not empty error}">
             <div class="error-toast show" id="errorToast">${error}</div>
             </c:if>
 
             <c:if test="${perfil != null}">
-            <div class="profile-card" id="profileCard">
-                <h2>PERFIL DEL ADMINISTRADOR</h2>
-                <div class="profile-grid">
-                    <div class="profile-field full-width">
-                        <label>DNI</label>
-                        <span id="pDni">${perfil.dni}</span>
+            <div class="modal-overlay" id="modalPerfil">
+                <div class="modal-card" style="width:500px;">
+                    <h2>PERFIL DEL ADMINISTRADOR</h2>
+                    <div class="profile-grid">
+                        <div class="profile-field full-width">
+                            <label>DNI</label>
+                            <span id="pDni">${perfil.dni}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Nombre</label>
+                            <span id="pNombre">${perfil.nombre}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Apellidos</label>
+                            <span id="pApellidos">${perfil.apellidos}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Fecha de Nacimiento</label>
+                            <span id="pFechaNac">${perfil.fechaNacimiento}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Edad</label>
+                            <span id="pEdad">${edad} años</span>
+                        </div>
+                        <div class="profile-field full-width">
+                            <label>Correo Electrónico</label>
+                            <span id="pCorreo">${perfil.correo}</span>
+                        </div>
+                        <div class="profile-field full-width">
+                            <label>Teléfono</label>
+                            <span id="pTelefono">${perfil.telefono}</span>
+                        </div>
+                        <button class="profile-close-btn" onclick="cerrarPerfil()">CERRAR</button>
+                        <button class="profile-edit-btn" onclick="editarPerfil()">EDITAR PERFIL</button>
                     </div>
-                    <div class="profile-field">
-                        <label>Nombre</label>
-                        <span id="pNombre">${perfil.nombre}</span>
-                    </div>
-                    <div class="profile-field">
-                        <label>Apellidos</label>
-                        <span id="pApellidos">${perfil.apellidos}</span>
-                    </div>
-                    <div class="profile-field">
-                        <label>Fecha de Nacimiento</label>
-                        <span id="pFechaNac">${perfil.fechaNacimiento}</span>
-                    </div>
-                    <div class="profile-field">
-                        <label>Edad</label>
-                        <span id="pEdad">${edad} años</span>
-                    </div>
-                    <div class="profile-field full-width">
-                        <label>Correo Electrónico</label>
-                        <span id="pCorreo">${perfil.correo}</span>
-                    </div>
-                    <div class="profile-field full-width">
-                        <label>Teléfono</label>
-                        <span id="pTelefono">${perfil.telefono}</span>
-                    </div>
-                    <button class="profile-close-btn" onclick="cerrarPerfil()">CERRAR</button>
-                    <button class="profile-edit-btn" onclick="editarPerfil()">EDITAR PERFIL</button>
                 </div>
             </div>
             </c:if>
 
             <c:if test="${perfil != null}">
-            <div class="edit-card" id="editCard">
-                <h2>EDITAR PERFIL</h2>
-                <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post">
-                    <div class="edit-grid">
-                        <div class="edit-field full-width">
-                            <label>DNI</label>
-                            <input type="text" name="dni" value="${perfil.dni}" readonly>
+            <div class="modal-overlay" id="modalEditPerfil">
+                <div class="modal-card" style="width:500px;">
+                    <h2>EDITAR PERFIL</h2>
+                    <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post">
+                        <div class="edit-grid">
+                            <div class="edit-field full-width">
+                                <label>DNI</label>
+                                <input type="text" name="dni" value="${perfil.dni}" readonly>
+                            </div>
+                            <div class="edit-field">
+                                <label>Nombre</label>
+                                <input type="text" name="nombre" value="${perfil.nombre}" required>
+                            </div>
+                            <div class="edit-field">
+                                <label>Apellidos</label>
+                                <input type="text" name="apellidos" value="${perfil.apellidos}" required>
+                            </div>
+                            <div class="edit-field">
+                                <label>Fecha de Nacimiento</label>
+                                <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}" required>
+                            </div>
+                            <div class="edit-field full-width">
+                                <label>Correo Electrónico</label>
+                                <input type="email" name="correo" value="${perfil.correo}" required>
+                            </div>
+                            <div class="edit-field full-width">
+                                <label>Teléfono</label>
+                                <input type="text" name="telefono" value="${perfil.telefono}" required>
+                            </div>
+                            <div class="edit-buttons">
+                                <button type="button" class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
+                                <button type="submit" class="btn-save">GUARDAR</button>
+                            </div>
                         </div>
-                        <div class="edit-field">
-                            <label>Nombre</label>
-                            <input type="text" name="nombre" value="${perfil.nombre}" required>
-                        </div>
-                        <div class="edit-field">
-                            <label>Apellidos</label>
-                            <input type="text" name="apellidos" value="${perfil.apellidos}" required>
-                        </div>
-                        <div class="edit-field">
-                            <label>Fecha de Nacimiento</label>
-                            <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}" required>
-                        </div>
-                        <div class="edit-field full-width">
-                            <label>Correo Electrónico</label>
-                            <input type="email" name="correo" value="${perfil.correo}" required>
-                        </div>
-                        <div class="edit-field full-width">
-                            <label>Teléfono</label>
-                            <input type="text" name="telefono" value="${perfil.telefono}" required>
-                        </div>
-                        <div class="edit-buttons">
-                            <button type="button" class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
-                            <button type="submit" class="btn-save">GUARDAR</button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
             </c:if>
 
@@ -842,21 +898,21 @@
         }
 
         function verPerfil() {
-            document.getElementById('profileCard').classList.add('visible');
+            document.getElementById('modalPerfil').classList.add('show');
         }
 
         function cerrarPerfil() {
-            document.getElementById('profileCard').classList.remove('visible');
+            document.getElementById('modalPerfil').classList.remove('show');
         }
 
         function editarPerfil() {
-            document.getElementById('profileCard').classList.remove('visible');
-            document.getElementById('editCard').classList.add('visible');
+            document.getElementById('modalPerfil').classList.remove('show');
+            document.getElementById('modalEditPerfil').classList.add('show');
         }
 
         function cancelarEdicion() {
-            document.getElementById('editCard').classList.remove('visible');
-            document.getElementById('profileCard').classList.add('visible');
+            document.getElementById('modalEditPerfil').classList.remove('show');
+            document.getElementById('modalPerfil').classList.add('show');
         }
 
         var successToast = document.getElementById('successToast');
@@ -980,6 +1036,17 @@
 
         function cerrarModalModificar() {
             document.getElementById('modalModificar').classList.remove('show');
+        }
+
+        function abrirModalEliminar(id, nombre) {
+            document.getElementById('elimId').value = id;
+            document.getElementById('elimNombreSede').textContent = nombre;
+            document.getElementById('inputDeletePassword').value = '';
+            document.getElementById('modalEliminar').classList.add('show');
+        }
+
+        function cerrarModalEliminar() {
+            document.getElementById('modalEliminar').classList.remove('show');
         }
 
         document.querySelectorAll('.sidebar-item').forEach(function(item) {
