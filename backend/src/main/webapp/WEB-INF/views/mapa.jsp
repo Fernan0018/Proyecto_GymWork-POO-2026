@@ -74,7 +74,7 @@
         }
         #mapaSVG {
             width:100%;
-            max-width:520px;
+            max-width:460px;
             height:auto;
             filter:drop-shadow(0 4px 20px rgba(0,0,0,.5));
         }
