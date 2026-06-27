@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,6 +9,7 @@
     <title>GymWork - Soporte</title>
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/GymWork_Logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -159,6 +161,27 @@
         .table-registro td{
             padding:12px;
             border-bottom:1px solid #333;
+        }
+        .asunto-scroll {
+            display: inline-block;
+            max-width: 260px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: thin;
+            scrollbar-color: #555 #1e1e1e;
+        }
+        .asunto-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .asunto-scroll::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        .asunto-scroll::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 3px;
+        }
+        .asunto-scroll::-webkit-scrollbar-thumb:hover {
+            background: #fcd535;
         }
         .table-registro tr:hover{
             background:#2a2a2a;
@@ -522,6 +545,270 @@
             85% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
         }
+
+        .btn-nuevo-ticket {
+            background: #fcd535;
+            border: none;
+            color: #111;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+        .btn-nuevo-ticket:hover {
+            background: #e6c12e;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.visible {
+            display: flex;
+        }
+        .ticket-form-card {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 40px 50px;
+            width: 520px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            position: relative;
+            z-index: 2;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .ticket-form-card h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: #fcd535;
+            margin: 0 0 30px 0;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .ticket-form-grid {
+            display: grid;
+            gap: 20px;
+        }
+        .ticket-field {
+            display: flex;
+            flex-direction: column;
+        }
+        .ticket-field label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .ticket-field input,
+        .ticket-field select {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .ticket-field input:focus,
+        .ticket-field select:focus {
+            border-color: #fcd535;
+        }
+        .ticket-field select option {
+            background: #2a2a2a;
+            color: #fff;
+        }
+        .ticket-form-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .ticket-form-buttons button {
+            flex: 1;
+            padding: 12px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .btn-ticket-cancelar {
+            background: transparent;
+            border: 1px solid #555;
+            color: #ccc;
+        }
+        .btn-ticket-cancelar:hover {
+            border-color: #fcd535;
+            color: #fcd535;
+        }
+        .btn-ticket-guardar {
+            background: #fcd535;
+            border: none;
+            color: #1a1a1a;
+        }
+        .btn-ticket-guardar:hover {
+            background: #e6c12e;
+        }
+
+        .btn-modificar-ticket {
+            background: transparent;
+            border: 1px solid #fcd535;
+            color: #fcd535;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+        .btn-modificar-ticket:hover {
+            background: #fcd535;
+            color: #111;
+        }
+        .btn-modificar-disabled {
+            opacity: 0.35;
+            border-color: #555;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .btn-modificar-disabled:hover {
+            background: transparent;
+            color: #666;
+            border-color: #555;
+        }
+        .chart-card {
+            margin-top: 30px;
+        }
+        .chart-layout {
+            display: flex;
+            gap: 30px;
+            align-items: stretch;
+        }
+        .chart-left {
+            flex: 1;
+            min-width: 0;
+        }
+        .chart-right {
+            width: 260px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+        .promedio-box {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 25px 20px;
+            text-align: center;
+            width: 100%;
+        }
+        .promedio-label {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        .promedio-valor {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #fcd535;
+            line-height: 1;
+        }
+        .promedio-unidad {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            color: #aaa;
+            font-weight: 400;
+        }
+        .promedio-fecha {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
+        .table-registro th:last-child,
+        .table-registro td:last-child {
+            text-align: center;
+        }
+
+        .modificar-field {
+            display: flex;
+            flex-direction: column;
+        }
+        .modificar-field label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .modificar-field .modificar-valor {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #aaa;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+        }
+        .modificar-field select {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .modificar-field select:focus {
+            border-color: #fcd535;
+        }
+        .modificar-field select option {
+            background: #2a2a2a;
+            color: #fff;
+        }
+        .modificar-form-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .modificar-form-buttons button {
+            flex: 1;
+            padding: 12px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
     </style>
 </head>
 <body>
@@ -571,6 +858,7 @@
                 <div class="module-card">
                     <div class="module-actions">
                         <input type="text" id="buscarTicket" placeholder="Buscar por asunto, remitente, categoría o sede" oninput="filtrarTickets()">
+                        <button class="btn-nuevo-ticket" onclick="abrirModalNuevoTicket()">+ NUEVO TICKET</button>
                     </div>
 
                     <h3>Total tickets: <span id="totalTickets">${tickets.size()}</span></h3>
@@ -586,13 +874,14 @@
                                     <th>Sede</th>
                                     <th>Prioridad</th>
                                     <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaTicketsBody">
                                 <c:forEach var="t" items="${tickets}">
                                     <tr>
                                         <td>${t.idTicket}</td>
-                                        <td>${t.asuntoTicket}</td>
+                                        <td><span class="asunto-scroll">${t.asuntoTicket}</span></td>
                                         <td>${t.remitente}</td>
                                         <td>
                                             <c:choose>
@@ -637,11 +926,157 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
+                                        <td>
+                                            <button class="btn-modificar-ticket ${t.estadoTicket == 'Resuelto' ? 'btn-modificar-disabled' : ''}"
+                                                onclick="${t.estadoTicket == 'Resuelto' ? '' : 'abrirModalModificar(this)'}"
+                                                ${t.estadoTicket == 'Resuelto' ? 'disabled' : ''}
+                                                data-id="${t.idTicket}"
+                                                data-asunto="${t.asuntoTicket}"
+                                                data-remitente="${t.remitente}"
+                                                data-categoria="${t.categoria}"
+                                                data-sede="${sedeMap[t.idSede]}"
+                                                data-prioridad="${t.prioridad}"
+                                                data-estado="${t.estadoTicket}">MODIFICAR</button>
+                                        </td>
                                     </tr>
                                 </c:forEach>
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <div class="module-card chart-card">
+                    <h3 style="color:#fcd535;font-family:'Bebas Neue';font-size:24px;letter-spacing:1px;margin:0 0 20px 0;">ESTADÍSTICAS</h3>
+                    <div class="chart-layout">
+                        <div class="chart-left">
+                            <canvas id="chartCategorias" height="150"></canvas>
+                        </div>
+                        <div class="chart-right">
+                            <c:choose>
+                                <c:when test="${ultimoPromedio != null}">
+                                    <div class="promedio-box">
+                                        <div class="promedio-label">TIEMPO PROMEDIO DE RESOLUCIÓN</div>
+                                        <div class="promedio-valor"><fmt:formatNumber value="${ultimoPromedio}" pattern="#0.00" /> <span class="promedio-unidad">min</span></div>
+                                        <div class="promedio-fecha">${ultimaFecha}</div>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="promedio-box">
+                                        <div class="promedio-label">TIEMPO PROMEDIO DE RESOLUCIÓN</div>
+                                        <div class="promedio-valor">-- <span class="promedio-unidad">min</span></div>
+                                        <div class="promedio-fecha">Sin datos</div>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-overlay" id="modalModificarTicket">
+                <div class="ticket-form-card">
+                    <h2>MODIFICAR TICKET</h2>
+                    <form id="formModificarTicket" action="${pageContext.request.contextPath}/soporte/modificar" method="post">
+                        <div class="ticket-form-grid">
+                            <div class="modificar-field">
+                                <label>ID Ticket</label>
+                                <div class="modificar-valor" id="modIdTicket"></div>
+                                <input type="hidden" name="idTicket" id="modIdTicketInput">
+                            </div>
+                            <div class="modificar-field">
+                                <label>Asunto</label>
+                                <div class="modificar-valor" id="modAsunto"></div>
+                            </div>
+                            <div class="modificar-field">
+                                <label>Remitente</label>
+                                <div class="modificar-valor" id="modRemitente"></div>
+                            </div>
+                            <div class="modificar-field">
+                                <label>Categoría</label>
+                                <div class="modificar-valor" id="modCategoria"></div>
+                            </div>
+                            <div class="modificar-field">
+                                <label>Sede</label>
+                                <div class="modificar-valor" id="modSede"></div>
+                            </div>
+                            <div class="modificar-field">
+                                <label>Prioridad</label>
+                                <div class="modificar-valor" id="modPrioridad"></div>
+                            </div>
+                            <div class="modificar-field">
+                                <label>Estado</label>
+                                <select name="estadoTicket" id="modEstado" required>
+                                    <option value="Abierto">Abierto</option>
+                                    <option value="En proceso">En proceso</option>
+                                    <option value="Resuelto">Resuelto</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modificar-form-buttons">
+                            <button type="button" class="btn-ticket-cancelar" onclick="cerrarModalModificar()">CANCELAR</button>
+                            <button type="submit" class="btn-ticket-guardar">GUARDAR</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal-overlay" id="modalNuevoTicket">
+                <div class="ticket-form-card">
+                    <h2>NUEVO TICKET</h2>
+                    <form id="formNuevoTicket" action="${pageContext.request.contextPath}/soporte/crear" method="post">
+                        <div class="ticket-form-grid">
+                            <div class="ticket-field">
+                                <label>Asunto del Ticket</label>
+                                <input type="text" name="asunto" required>
+                            </div>
+                            <div class="ticket-field">
+                                <label>Remitente</label>
+                                <input type="text" name="remitente" required>
+                            </div>
+                            <div class="ticket-field">
+                                <label>Categoría</label>
+                                <select name="categoria" id="categoriaSelect" onchange="mostrarCampoCategoria()" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Suscripciones">Suscripciones</option>
+                                    <option value="Registro">Registro</option>
+                                    <option value="Software">Software</option>
+                                    <option value="Sedes">Sedes</option>
+                                    <option value="Máquinas">Máquinas</option>
+                                </select>
+                            </div>
+                            <div class="ticket-field" id="campoSede" style="display:none;">
+                                <label>Sede</label>
+                                <select name="idSede">
+                                    <option value="">Seleccionar sede...</option>
+                                    <c:forEach var="s" items="${sedes}">
+                                        <option value="${s.idSede}">${s.nombreSede}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            <div class="ticket-field" id="campoMaquina" style="display:none;">
+                                <label>Máquina</label>
+                                <select name="idMaquina">
+                                    <option value="">Seleccionar máquina...</option>
+                                    <c:forEach var="m" items="${maquinas}">
+                                        <option value="${m.idMaquina}">${m.nombreModelo}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            <div class="ticket-field">
+                                <label>Prioridad</label>
+                                <select name="prioridad" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Baja">Baja</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Alta">Alta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="ticket-form-buttons">
+                            <button type="button" class="btn-ticket-cancelar" onclick="cerrarModalNuevoTicket()">CANCELAR</button>
+                            <button type="submit" class="btn-ticket-guardar">GUARDAR</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -820,6 +1255,81 @@
             tooltipEl.style.left = x + 'px';
             tooltipEl.style.top = y + 'px';
         }
+
+        function abrirModalNuevoTicket() {
+            document.getElementById('modalNuevoTicket').classList.add('visible');
+            document.getElementById('formNuevoTicket').reset();
+            document.getElementById('campoSede').style.display = 'none';
+            document.getElementById('campoMaquina').style.display = 'none';
+        }
+
+        function cerrarModalNuevoTicket() {
+            document.getElementById('modalNuevoTicket').classList.remove('visible');
+        }
+
+        function mostrarCampoCategoria() {
+            var cat = document.getElementById('categoriaSelect').value;
+            document.getElementById('campoSede').style.display = cat === 'Sedes' ? 'block' : 'none';
+            document.getElementById('campoMaquina').style.display = cat === 'Máquinas' ? 'block' : 'none';
+        }
+
+        function abrirModalModificar(btn) {
+            document.getElementById('modIdTicket').textContent = btn.getAttribute('data-id');
+            document.getElementById('modIdTicketInput').value = btn.getAttribute('data-id');
+            document.getElementById('modAsunto').textContent = btn.getAttribute('data-asunto');
+            document.getElementById('modRemitente').textContent = btn.getAttribute('data-remitente');
+            document.getElementById('modCategoria').textContent = btn.getAttribute('data-categoria');
+            document.getElementById('modSede').textContent = btn.getAttribute('data-sede');
+            document.getElementById('modPrioridad').textContent = btn.getAttribute('data-prioridad');
+            document.getElementById('modEstado').value = btn.getAttribute('data-estado');
+            document.getElementById('modalModificarTicket').classList.add('visible');
+        }
+
+        function cerrarModalModificar() {
+            document.getElementById('modalModificarTicket').classList.remove('visible');
+        }
+
+        var ctx = document.getElementById('chartCategorias').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    <c:forEach var="entry" items="${categoriasCount}" varStatus="s">
+                        '${entry.key}'${s.last ? '' : ','}
+                    </c:forEach>
+                ],
+                datasets: [{
+                    label: 'Tickets',
+                    data: [
+                        <c:forEach var="entry" items="${categoriasCount}" varStatus="s">
+                            ${entry.value}${s.last ? '' : ','}
+                        </c:forEach>
+                    ],
+                    backgroundColor: ['#fcd535','#ff6b7a','#5ddb6e','#6db3ff','#ffb366'],
+                    borderColor: ['#fcd535','#ff6b7a','#5ddb6e','#6db3ff','#ffb366'],
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#ccc', font: { family: 'Montserrat', size: 12 } },
+                        grid: { color: '#333' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#ccc', font: { family: 'Montserrat', size: 12 }, stepSize: 1 },
+                        grid: { color: '#333' }
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>
