@@ -858,10 +858,37 @@
                 <div class="module-card">
                     <div class="module-actions">
                         <input type="text" id="buscarTicket" placeholder="Buscar por asunto, remitente, categoría o sede" oninput="filtrarTickets()">
+                        <a href="${pageContext.request.contextPath}/soporte/reporte/diario" class="btn-descargar-pdf" style="background:#28a745;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.5px;white-space:nowrap;">DESCARGAR PDF</a>
                         <button class="btn-nuevo-ticket" onclick="abrirModalNuevoTicket()">+ NUEVO TICKET</button>
                     </div>
 
-                    <h3>Total tickets: <span id="totalTickets">${tickets.size()}</span></h3>
+                    <form action="${pageContext.request.contextPath}/soporte" method="get" class="filter-form" style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;align-items:center;">
+                        <select name="categoria" onchange="this.form.submit()" style="background:#2a2a2a;border:1px solid #444;border-radius:6px;padding:8px 10px;color:#fff;font-family:'Montserrat',sans-serif;outline:none;">
+                            <option value="">Todas las categorías</option>
+                            <option value="Suscripciones" ${param.categoria == 'Suscripciones' ? 'selected' : ''}>Suscripciones</option>
+                            <option value="Registro" ${param.categoria == 'Registro' ? 'selected' : ''}>Registro</option>
+                            <option value="Software" ${param.categoria == 'Software' ? 'selected' : ''}>Software</option>
+                            <option value="Sedes" ${param.categoria == 'Sedes' ? 'selected' : ''}>Sedes</option>
+                            <option value="Máquinas" ${param.categoria == 'Máquinas' ? 'selected' : ''}>Máquinas</option>
+                        </select>
+                        <select name="prioridad" onchange="this.form.submit()" style="background:#2a2a2a;border:1px solid #444;border-radius:6px;padding:8px 10px;color:#fff;font-family:'Montserrat',sans-serif;outline:none;">
+                            <option value="">Todas las prioridades</option>
+                            <option value="Baja" ${param.prioridad == 'Baja' ? 'selected' : ''}>Baja</option>
+                            <option value="Media" ${param.prioridad == 'Media' ? 'selected' : ''}>Media</option>
+                            <option value="Alta" ${param.prioridad == 'Alta' ? 'selected' : ''}>Alta</option>
+                        </select>
+                        <select name="estado" onchange="this.form.submit()" style="background:#2a2a2a;border:1px solid #444;border-radius:6px;padding:8px 10px;color:#fff;font-family:'Montserrat',sans-serif;outline:none;">
+                            <option value="">Todos los estados</option>
+                            <option value="Abierto" ${param.estado == 'Abierto' ? 'selected' : ''}>Abierto</option>
+                            <option value="En proceso" ${param.estado == 'En proceso' ? 'selected' : ''}>En proceso</option>
+                            <option value="Resuelto" ${param.estado == 'Resuelto' ? 'selected' : ''}>Resuelto</option>
+                        </select>
+                        <c:if test="${not empty param.categoria or not empty param.prioridad or not empty param.estado}">
+                            <a href="${pageContext.request.contextPath}/soporte" style="color:#fcd535;font-size:13px;text-decoration:none;padding:8px 12px;border:1px solid #fcd535;border-radius:6px;">Limpiar</a>
+                        </c:if>
+                    </form>
+
+                    <h3>Total tickets: <span id="totalTickets">${ticketPage.totalElements}</span></h3>
 
                     <div class="table-wrapper">
                         <table class="table-registro">
@@ -943,6 +970,18 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <c:if test="${ticketPage.totalPages > 1}">
+                        <div class="pagination" style="display:flex;justify-content:center;align-items:center;gap:15px;margin-top:20px;flex-wrap:wrap;">
+                            <c:if test="${ticketPage.hasPrevious()}">
+                                <a href="${pageContext.request.contextPath}/soporte?page=${ticketPage.number - 1}&size=${ticketPage.size}&categoria=${param.categoria}&prioridad=${param.prioridad}&estado=${param.estado}" style="color:#fcd535;text-decoration:none;padding:8px 16px;border:1px solid #fcd535;border-radius:6px;font-size:14px;">Anterior</a>
+                            </c:if>
+                            <span style="color:#aaa;font-size:14px;">Página ${ticketPage.number + 1} de ${ticketPage.totalPages}</span>
+                            <c:if test="${ticketPage.hasNext()}">
+                                <a href="${pageContext.request.contextPath}/soporte?page=${ticketPage.number + 1}&size=${ticketPage.size}&categoria=${param.categoria}&prioridad=${param.prioridad}&estado=${param.estado}" style="color:#fcd535;text-decoration:none;padding:8px 16px;border:1px solid #fcd535;border-radius:6px;font-size:14px;">Siguiente</a>
+                            </c:if>
+                        </div>
+                    </c:if>
                 </div>
 
                 <div class="module-card chart-card">
@@ -1215,7 +1254,7 @@
                 }
             }
 
-            document.getElementById('totalTickets').textContent = visibles;
+            document.getElementById('totalTickets').textContent = visibles + ' / ${ticketPage.totalElements}';
         }
 
         document.querySelectorAll('.sidebar-item').forEach(function(item) {
