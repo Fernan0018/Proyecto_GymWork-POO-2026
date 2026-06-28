@@ -27,6 +27,10 @@ public class UsuariosGW {
     @JsonProperty("password")
     private String password;
 
+    @Column(name = "DeletePassword")
+    @JsonProperty("deletePassword")
+    private String deletePassword;
+
     public UsuariosGW() {}
 
     public Integer getIdUsuario() { return idUsuario; }
@@ -37,4 +41,7 @@ public class UsuariosGW {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getDeletePassword() { return deletePassword; }
+    public void setDeletePassword(String deletePassword) { this.deletePassword = deletePassword; }
 }

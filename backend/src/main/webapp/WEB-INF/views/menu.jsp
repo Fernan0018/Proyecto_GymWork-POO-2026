@@ -427,16 +427,19 @@
             <div class="sidebar-item" data-modulo="suscripciones">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Suscripciones"> Suscripciones
             </div>
-            <div class="sidebar-item" data-modulo="registro">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/registro'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Registro.png" alt="Registro"> Registro
             </div>
-            <div class="sidebar-item" data-modulo="sedes">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/sedes'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Sedes.png" alt="Sedes"> Sedes
             </div>
             <div class="sidebar-item" data-modulo="maquinas">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Maquinas.png" alt="Estado de Máquinas"> Estado de Máquinas
             </div>
-            <div class="sidebar-item" data-modulo="soporte">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/soporte'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Soporte.png" alt="Soporte"> Soporte
             </div>
             <div class="sidebar-item" data-modulo="admin">
