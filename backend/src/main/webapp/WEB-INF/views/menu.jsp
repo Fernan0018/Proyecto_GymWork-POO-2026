@@ -103,10 +103,11 @@
             position: relative;
             flex: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             background-color: #121212;
-            overflow: hidden;
+            overflow-y: auto;
             color: #ffffff;
             font-family: 'Montserrat', sans-serif;
         }
@@ -117,12 +118,17 @@
             border-radius: 50%;
             border: 2px solid rgba(255, 204, 0, 0.15);
             box-shadow: 0 0 100px rgba(255, 204, 0, 0.05) inset;
-            z-index: 1;
+            pointer-events: none;
+            z-index: 0;
         }
         .welcome-message-container {
             position: relative;
             z-index: 2;
             text-align: center;
+        }
+        #dynamicContent {
+            position: relative;
+            z-index: 1;
         }
         .greeting {
             font-size: 3rem;
@@ -588,13 +594,71 @@
                 document.querySelectorAll('.sidebar-item').forEach(function(i) { i.classList.remove('active'); });
                 this.classList.add('active');
                 var modulo = this.getAttribute('data-modulo');
-                var greeting = document.getElementById('greeting');
-                var statusMsg = document.querySelector('.status-message');
-                var instruction = document.querySelector('.instruction');
-                greeting.innerText = 'Modulo: ' + this.textContent.trim();
-                statusMsg.innerText = 'Cargando contenido...';
-                instruction.innerHTML = 'Use las opciones disponibles<br>para gestionar este modulo.';
+
+                document.getElementById('welcomeContainer').style.display = '';
+
+                var pc = document.getElementById('profileCard');
+                if (pc) pc.classList.remove('visible');
+                var ec = document.getElementById('editCard');
+                if (ec) ec.classList.remove('visible');
+
+                var container = document.getElementById('dynamicContent');
+                if (container) { container.innerHTML = ''; container.style.display = 'none'; }
+
+                if (modulo === 'suscripciones') {
+                    fetch('${pageContext.request.contextPath}/suscripciones')
+                        .then(function(r) { return r.text(); })
+                        .then(function(html) {
+                            document.getElementById('welcomeContainer').style.display = 'none';
+                            var dc = document.getElementById('dynamicContent');
+                            if (!dc) {
+                                dc = document.createElement('div');
+                                dc.id = 'dynamicContent';
+                                document.querySelector('.dashboard-main-content').appendChild(dc);
+                            }
+                            dc.style.display = '';
+                            dc.innerHTML = html;
+                        });
+                } else {
+                    var greeting = document.getElementById('greeting');
+                    var statusMsg = document.querySelector('.status-message');
+                    var instruction = document.querySelector('.instruction');
+                    greeting.innerText = 'Modulo: ' + this.textContent.trim();
+                    statusMsg.innerText = 'Cargando contenido...';
+                    instruction.innerHTML = 'Use las opciones disponibles<br>para gestionar este modulo.';
+                }
             });
+        });
+
+        document.addEventListener('submit', function(e) {
+            if (e.target && e.target.id === 'suscripcionForm') {
+                e.preventDefault();
+                var formData = new FormData(e.target);
+                var params = new URLSearchParams(formData);
+                var mensajeDiv = document.getElementById('mensajeSuscripcion');
+                fetch('${pageContext.request.contextPath}/suscripciones/guardar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params
+                })
+                .then(function(response) {
+                    if (!response.ok) {
+                        return response.json().then(function(data) {
+                            throw new Error(data.error || 'Error al registrar');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        mensajeDiv.innerHTML = '<p style="color: #00cc66; font-weight: bold;">Suscripci\u00f3n guardada con \u00e9xito</p>';
+                        e.target.reset();
+                    }
+                })
+                .catch(function(error) {
+                    mensajeDiv.innerHTML = '<p style="color: #ff3333; font-weight: bold;">Error: ' + error.message + '</p>';
+                });
+            }
         });
     </script>
 </body>
