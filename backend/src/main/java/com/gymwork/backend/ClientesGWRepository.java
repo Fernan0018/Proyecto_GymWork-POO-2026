@@ -6,7 +6,7 @@ import java.util.List;
 
 @Repository
 public interface ClientesGWRepository extends JpaRepository<ClientesGW, String> {
-    List<ClientesGW> findByNombresClienteContainingIgnoreCaseOrCodigoClienteContainingIgnoreCase(
+    List<ClientesGW> findByNombreContainingIgnoreCaseOrCodigoContainingIgnoreCase(
         String nombre,
         String codigo
     );

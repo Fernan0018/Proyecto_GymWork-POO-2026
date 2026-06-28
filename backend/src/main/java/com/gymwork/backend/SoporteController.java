@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -68,14 +69,21 @@ public class SoporteController {
             @RequestParam(value = "estado", required = false) String estado,
             @PageableDefault(size = 10, sort = "idTicket", direction = Sort.Direction.DESC) Pageable pageable) {
         String username = (String) session.getAttribute("username");
-        if (username != null) {
+        if (username == null) {
+            return "redirect:/login";
+        }
+        DatosAdminGW perfil = (DatosAdminGW) session.getAttribute("perfil");
+        if (perfil == null) {
             var datosOpt = datosAdminRepository.findByUsuarioUsername(username);
             if (datosOpt.isPresent()) {
-                DatosAdminGW datos = datosOpt.get();
-                model.addAttribute("perfil", datos);
-                int edad = Period.between(datos.getFechaNacimiento(), LocalDate.now()).getYears();
-                model.addAttribute("edad", edad);
+                perfil = datosOpt.get();
+                session.setAttribute("perfil", perfil);
             }
+        }
+        if (perfil != null) {
+            model.addAttribute("perfil", perfil);
+            int edad = Period.between(perfil.getFechaNacimiento(), LocalDate.now()).getYears();
+            model.addAttribute("edad", edad);
         }
 
         procesarCierreDia();
@@ -126,7 +134,12 @@ public class SoporteController {
     }
 
     @GetMapping("/soporte/reporte/diario")
-    public ResponseEntity<byte[]> generarReporteDiario() {
+    public ResponseEntity<byte[]> generarReporteDiario(HttpSession session) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return ResponseEntity.status(401).build();
+        }
+
         LocalDate hoy = LocalDate.now();
 
         List<TiemposTicketGW> tiemposHoy = tiemposTicketRepository.findByDiaResolucion(hoy);
@@ -439,6 +452,19 @@ public class SoporteController {
         return img;
     }
 
+    private boolean isValidCategoria(String categoria) {
+        return categoria != null && (categoria.equals("Suscripciones") || categoria.equals("Registro")
+                || categoria.equals("Software") || categoria.equals("Sedes") || categoria.equals("M\u00E1quinas"));
+    }
+
+    private boolean isValidPrioridad(String prioridad) {
+        return prioridad != null && (prioridad.equals("Baja") || prioridad.equals("Media") || prioridad.equals("Alta"));
+    }
+
+    private boolean isValidEstadoTicket(String estado) {
+        return estado != null && (estado.equals("Abierto") || estado.equals("En proceso") || estado.equals("Resuelto"));
+    }
+
     @PostMapping("/soporte/crear")
     public String crearTicket(
             @RequestParam("asunto") String asunto,
@@ -446,26 +472,99 @@ public class SoporteController {
             @RequestParam("categoria") String categoria,
             @RequestParam(value = "idSede", required = false) Integer idSede,
             @RequestParam(value = "idMaquina", required = false) Integer idMaquina,
-            @RequestParam("prioridad") String prioridad) {
+            @RequestParam("prioridad") String prioridad,
+            HttpSession session,
+            RedirectAttributes redirect) {
+
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            redirect.addFlashAttribute("error", "Debe iniciar sesi\u00F3n");
+            return "redirect:/login";
+        }
+
+        if (asunto == null || asunto.trim().isEmpty()) {
+            redirect.addFlashAttribute("error", "El asunto del ticket es obligatorio");
+            return "redirect:/soporte";
+        }
+
+        if (asunto.trim().length() < 5) {
+            redirect.addFlashAttribute("error", "El asunto debe tener al menos 5 caracteres");
+            return "redirect:/soporte";
+        }
+
+        if (remitente == null || remitente.trim().isEmpty()) {
+            redirect.addFlashAttribute("error", "El remitente es obligatorio");
+            return "redirect:/soporte";
+        }
+
+        if (!isValidCategoria(categoria)) {
+            redirect.addFlashAttribute("error", "La categor\u00EDa seleccionada no es v\u00E1lida");
+            return "redirect:/soporte";
+        }
+
+        if ("Sedes".equals(categoria) && (idSede == null || idSede <= 0)) {
+            redirect.addFlashAttribute("error", "Debe seleccionar una sede para la categor\u00EDa Sedes");
+            return "redirect:/soporte";
+        }
+
+        if ("M\u00E1quinas".equals(categoria) && (idMaquina == null || idMaquina <= 0)) {
+            redirect.addFlashAttribute("error", "Debe seleccionar una m\u00E1quina para la categor\u00EDa M\u00E1quinas");
+            return "redirect:/soporte";
+        }
+
+        if (idSede != null && idSede > 0 && sedesRepository.findById(idSede).isEmpty()) {
+            redirect.addFlashAttribute("error", "La sede seleccionada no existe");
+            return "redirect:/soporte";
+        }
+
+        if (idMaquina != null && idMaquina > 0 && maquinasRepository.findById(idMaquina).isEmpty()) {
+            redirect.addFlashAttribute("error", "La m\u00E1quina seleccionada no existe");
+            return "redirect:/soporte";
+        }
+
+        if (!isValidPrioridad(prioridad)) {
+            redirect.addFlashAttribute("error", "La prioridad seleccionada no es v\u00E1lida");
+            return "redirect:/soporte";
+        }
+
         SoporteGW ticket = new SoporteGW();
-        ticket.setAsuntoTicket(asunto);
-        ticket.setRemitente(remitente);
+        ticket.setAsuntoTicket(asunto.trim());
+        ticket.setRemitente(remitente.trim());
         ticket.setCategoria(categoria);
-        ticket.setIdSede(idSede);
-        ticket.setIdMaquinas(idMaquina);
+        ticket.setIdSede(idSede != null && idSede > 0 ? idSede : null);
+        ticket.setIdMaquinas(idMaquina != null && idMaquina > 0 ? idMaquina : null);
         ticket.setPrioridad(prioridad);
         ticket.setEstadoTicket("Abierto");
         soporteRepository.save(ticket);
+        redirect.addFlashAttribute("exito", "Ticket creado correctamente");
         return "redirect:/soporte";
     }
 
     @PostMapping("/soporte/modificar")
     public String modificarTicket(
             @RequestParam("idTicket") Integer idTicket,
-            @RequestParam("estadoTicket") String estadoTicket) {
+            @RequestParam("estadoTicket") String estadoTicket,
+            HttpSession session,
+            RedirectAttributes redirect) {
+
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            redirect.addFlashAttribute("error", "Debe iniciar sesi\u00F3n");
+            return "redirect:/login";
+        }
+
+        if (!isValidEstadoTicket(estadoTicket)) {
+            redirect.addFlashAttribute("error", "El estado seleccionado no es v\u00E1lido");
+            return "redirect:/soporte";
+        }
+
         Optional<SoporteGW> opt = soporteRepository.findById(idTicket);
-        if (opt.isPresent()) {
-            SoporteGW ticket = opt.get();
+        if (opt.isEmpty()) {
+            redirect.addFlashAttribute("error", "El ticket no existe");
+            return "redirect:/soporte";
+        }
+
+        SoporteGW ticket = opt.get();
             ticket.setEstadoTicket(estadoTicket);
             soporteRepository.save(ticket);
 
@@ -504,7 +603,7 @@ public class SoporteController {
                 }
                 actualizarPromedioDiario();
             }
-        }
+            redirect.addFlashAttribute("exito", "Ticket modificado correctamente");
         return "redirect:/soporte";
     }
 

@@ -8,4 +8,6 @@ public interface SedesGWRepository extends JpaRepository<SedesGW, Integer> {
         String nombre,
         String departamento
     );
+
+    List<SedesGW> findByNombreSedeIgnoreCase(String nombreSede);
 }

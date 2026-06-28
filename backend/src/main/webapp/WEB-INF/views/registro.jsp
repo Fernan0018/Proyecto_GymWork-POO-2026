@@ -515,8 +515,8 @@
 <tbody>
 <c:forEach var="c" items="${clientes}">
     <tr>
-        <td>${c.codigoCliente}</td>
-        <td>${c.nombresCliente}</td>
+        <td>${c.codigo}</td>
+        <td>${c.nombre}</td>
         <td>${c.apellidoPaterno} ${c.apellidoMaterno}</td>
         <td>${c.tipoPlan}</td>
         <td>${c.fechaRegistro}</td>

@@ -105,7 +105,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
             background-color: #121212;
             overflow-y: auto;
             color: #ffffff;
@@ -135,18 +135,21 @@
             font-weight: 300;
             margin-bottom: 0.5rem;
             color: #f0f0f0;
+            text-align: center;
         }
         .status-message {
             font-size: 2.5rem;
             font-weight: 400;
             margin-bottom: 2rem;
             color: #ffffff;
+            text-align: center;
         }
         .instruction {
             font-size: 1.2rem;
             font-weight: 300;
             color: #aaaaaa;
             line-height: 1.5;
+            text-align: center;
         }
         .sidebar {
             width: 260px;
@@ -405,6 +408,23 @@
             85% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
         }
+        .edit-field input.error {
+            border-color: #ff4444 !important;
+        }
+        .edit-field input.valid {
+            border-color: #4caf50 !important;
+        }
+        .edit-field .validation-msg {
+            font-size: 11px;
+            margin-top: 4px;
+            min-height: 15px;
+        }
+        .edit-field .validation-msg.error {
+            color: #ff4444;
+        }
+        .edit-field .validation-msg.ok {
+            color: #4caf50;
+        }
     </style>
 </head>
 <body>
@@ -497,7 +517,7 @@
             <c:if test="${perfil != null}">
             <div class="edit-card" id="editCard">
                 <h2>EDITAR PERFIL</h2>
-                <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post">
+                <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post" novalidate>
                     <div class="edit-grid">
                         <div class="edit-field full-width">
                             <label>DNI</label>
@@ -505,23 +525,23 @@
                         </div>
                         <div class="edit-field">
                             <label>Nombre</label>
-                            <input type="text" name="nombre" value="${perfil.nombre}" required>
+                            <input type="text" name="nombre" value="${perfil.nombre}">
                         </div>
                         <div class="edit-field">
                             <label>Apellidos</label>
-                            <input type="text" name="apellidos" value="${perfil.apellidos}" required>
+                            <input type="text" name="apellidos" value="${perfil.apellidos}">
                         </div>
                         <div class="edit-field">
                             <label>Fecha de Nacimiento</label>
-                            <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}" required>
+                            <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}">
                         </div>
                         <div class="edit-field full-width">
                             <label>Correo Electrónico</label>
-                            <input type="email" name="correo" value="${perfil.correo}" required>
+                            <input type="email" name="correo" value="${perfil.correo}">
                         </div>
                         <div class="edit-field full-width">
                             <label>Teléfono</label>
-                            <input type="text" name="telefono" value="${perfil.telefono}" required>
+                            <input type="text" name="telefono" value="${perfil.telefono}">
                         </div>
                         <div class="edit-buttons">
                             <button type="button" class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
@@ -663,6 +683,83 @@
                 });
             }
         });
+    </script>
+    <script>
+        (function() {
+            var c = document.getElementById('editCard');
+            if (!c) return;
+            var f = c.querySelector('form');
+            if (!f) return;
+            var rules = {
+                nombre: function(v) {
+                    v = v.trim();
+                    if (v.length < 2) return 'Mínimo 2 caracteres';
+                    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(v)) return 'Solo letras';
+                    return '';
+                },
+                apellidos: function(v) {
+                    v = v.trim();
+                    if (v.length < 2) return 'Mínimo 2 caracteres';
+                    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(v)) return 'Solo letras';
+                    return '';
+                },
+                fechaNacimiento: function(v) {
+                    if (!v) return 'Requerido';
+                    var d = new Date(v + 'T00:00:00');
+                    if (isNaN(d.getTime())) return 'Fecha inválida';
+                    if (d >= new Date()) return 'Debe ser fecha pasada';
+                    return '';
+                },
+                correo: function(v) {
+                    v = v.trim();
+                    if (!v) return 'Requerido';
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Correo inválido';
+                    return '';
+                },
+                telefono: function(v) {
+                    v = v.trim();
+                    if (!v) return 'Requerido';
+                    var digits = v.replace(/\D/g, '');
+                    if (digits.length < 9) return 'Mínimo 9 dígitos';
+                    return '';
+                }
+            };
+            Object.keys(rules).forEach(function(name) {
+                var inp = c.querySelector('input[name="' + name + '"]');
+                if (!inp) return;
+                var field = inp.closest('.edit-field');
+                if (!field) return;
+                var msg = document.createElement('span');
+                msg.className = 'validation-msg';
+                field.appendChild(msg);
+                function check() {
+                    var err = rules[name](inp.value);
+                    if (err) {
+                        inp.classList.remove('valid');
+                        inp.classList.add('error');
+                        msg.textContent = err;
+                        msg.className = 'validation-msg error';
+                    } else {
+                        inp.classList.remove('error');
+                        inp.classList.add('valid');
+                        msg.textContent = '✓';
+                        msg.className = 'validation-msg ok';
+                    }
+                }
+                inp.addEventListener('input', check);
+                inp.addEventListener('blur', check);
+                check();
+            });
+            f.addEventListener('submit', function(e) {
+                var bad = false;
+                Object.keys(rules).forEach(function(name) {
+                    var inp = c.querySelector('input[name="' + name + '"]');
+                    if (!inp) return;
+                    if (rules[name](inp.value)) bad = true;
+                });
+                if (bad) e.preventDefault();
+            });
+        })();
     </script>
 </body>
 </html>

@@ -629,6 +629,50 @@
         .ticket-field select:focus {
             border-color: #fcd535;
         }
+        .ticket-field input.error,
+        .ticket-field select.error {
+            border-color: #ff4444;
+        }
+        .ticket-field input.valid,
+        .ticket-field select.valid {
+            border-color: #4caf50;
+        }
+        .ticket-field .validation-msg {
+            font-size: 11px;
+            margin-top: 4px;
+            min-height: 15px;
+        }
+        .ticket-field .validation-msg.error {
+            color: #ff4444;
+        }
+        .ticket-field .validation-msg.ok {
+            color: #4caf50;
+        }
+        .ticket-form-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .modificar-field select.error {
+            border-color: #ff4444;
+        }
+        .modificar-field select.valid {
+            border-color: #4caf50;
+        }
+        .modificar-field .validation-msg {
+            font-size: 11px;
+            margin-top: 4px;
+            min-height: 15px;
+        }
+        .modificar-field .validation-msg.error {
+            color: #ff4444;
+        }
+        .modificar-field .validation-msg.ok {
+            color: #4caf50;
+        }
+        .modificar-form-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .ticket-field select option {
             background: #2a2a2a;
             color: #fff;
@@ -1044,11 +1088,13 @@
                             </div>
                             <div class="modificar-field">
                                 <label>Estado</label>
-                                <select name="estadoTicket" id="modEstado" required>
+                                <select name="estadoTicket" id="modEstado" required onchange="validarEstadoMod()">
+                                    <option value="">Seleccionar...</option>
                                     <option value="Abierto">Abierto</option>
                                     <option value="En proceso">En proceso</option>
                                     <option value="Resuelto">Resuelto</option>
                                 </select>
+                                <div class="validation-msg" id="modEstadoMsg"></div>
                             </div>
                         </div>
                         <div class="modificar-form-buttons">
@@ -1066,15 +1112,17 @@
                         <div class="ticket-form-grid">
                             <div class="ticket-field">
                                 <label>Asunto del Ticket</label>
-                                <input type="text" name="asunto" required>
+                                <input type="text" name="asunto" id="inputAsunto" required oninput="validarAsunto()">
+                                <div class="validation-msg" id="asuntoMsg"></div>
                             </div>
                             <div class="ticket-field">
                                 <label>Remitente</label>
-                                <input type="text" name="remitente" required>
+                                <input type="text" name="remitente" id="inputRemitente" required oninput="validarRemitente()">
+                                <div class="validation-msg" id="remitenteMsg"></div>
                             </div>
                             <div class="ticket-field">
                                 <label>Categoría</label>
-                                <select name="categoria" id="categoriaSelect" onchange="mostrarCampoCategoria()" required>
+                                <select name="categoria" id="inputCategoria" onchange="mostrarCampoCategoria(); validarCategoria()" required>
                                     <option value="">Seleccionar...</option>
                                     <option value="Suscripciones">Suscripciones</option>
                                     <option value="Registro">Registro</option>
@@ -1082,33 +1130,37 @@
                                     <option value="Sedes">Sedes</option>
                                     <option value="Máquinas">Máquinas</option>
                                 </select>
+                                <div class="validation-msg" id="categoriaMsg"></div>
                             </div>
                             <div class="ticket-field" id="campoSede" style="display:none;">
                                 <label>Sede</label>
-                                <select name="idSede">
+                                <select name="idSede" id="inputSede" onchange="validarSedeMaquina()">
                                     <option value="">Seleccionar sede...</option>
                                     <c:forEach var="s" items="${sedes}">
                                         <option value="${s.idSede}">${s.nombreSede}</option>
                                     </c:forEach>
                                 </select>
+                                <div class="validation-msg" id="sedeMsg"></div>
                             </div>
                             <div class="ticket-field" id="campoMaquina" style="display:none;">
                                 <label>Máquina</label>
-                                <select name="idMaquina">
+                                <select name="idMaquina" id="inputMaquina" onchange="validarSedeMaquina()">
                                     <option value="">Seleccionar máquina...</option>
                                     <c:forEach var="m" items="${maquinas}">
                                         <option value="${m.idMaquina}">${m.nombreModelo}</option>
                                     </c:forEach>
                                 </select>
+                                <div class="validation-msg" id="maquinaMsg"></div>
                             </div>
                             <div class="ticket-field">
                                 <label>Prioridad</label>
-                                <select name="prioridad" required>
+                                <select name="prioridad" id="inputPrioridad" required onchange="validarPrioridad()">
                                     <option value="">Seleccionar...</option>
                                     <option value="Baja">Baja</option>
                                     <option value="Media">Media</option>
                                     <option value="Alta">Alta</option>
                                 </select>
+                                <div class="validation-msg" id="prioridadMsg"></div>
                             </div>
                         </div>
                         <div class="ticket-form-buttons">
@@ -1157,6 +1209,14 @@
                     </div>
                 </div>
             </div>
+            </c:if>
+
+            <c:if test="${not empty error}">
+            <div class="error-toast show" id="errorToast">${error}</div>
+            </c:if>
+
+            <c:if test="${not empty exito}">
+            <div class="success-toast show" id="successToast">${exito}</div>
             </c:if>
 
             <c:if test="${perfil != null}">
@@ -1300,6 +1360,21 @@
             document.getElementById('formNuevoTicket').reset();
             document.getElementById('campoSede').style.display = 'none';
             document.getElementById('campoMaquina').style.display = 'none';
+            limpiarValidacionesNuevoTicket();
+            document.querySelector('#formNuevoTicket button[type="submit"]').disabled = true;
+        }
+
+        function limpiarValidacionesNuevoTicket() {
+            var ids = ['inputAsunto','inputRemitente','inputCategoria','inputSede','inputMaquina','inputPrioridad'];
+            var msgIds = ['asuntoMsg','remitenteMsg','categoriaMsg','sedeMsg','maquinaMsg','prioridadMsg'];
+            ids.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.className = '';
+            });
+            msgIds.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) { el.textContent = ''; el.className = 'validation-msg'; }
+            });
         }
 
         function cerrarModalNuevoTicket() {
@@ -1321,11 +1396,137 @@
             document.getElementById('modSede').textContent = btn.getAttribute('data-sede');
             document.getElementById('modPrioridad').textContent = btn.getAttribute('data-prioridad');
             document.getElementById('modEstado').value = btn.getAttribute('data-estado');
+            document.getElementById('modEstado').className = 'valid';
+            document.getElementById('modEstadoMsg').textContent = '';
+            document.getElementById('modEstadoMsg').className = 'validation-msg';
+            document.querySelector('#formModificarTicket button[type="submit"]').disabled = false;
             document.getElementById('modalModificarTicket').classList.add('visible');
         }
 
         function cerrarModalModificar() {
             document.getElementById('modalModificarTicket').classList.remove('visible');
+            document.getElementById('modEstado').className = '';
+            document.getElementById('modEstadoMsg').textContent = '';
+            document.getElementById('modEstadoMsg').className = 'validation-msg';
+        }
+
+        var successToast = document.getElementById('successToast');
+        if (successToast) {
+            setTimeout(function() { successToast.style.display = 'none'; }, 3000);
+        }
+        var errorToast = document.getElementById('errorToast');
+        if (errorToast) {
+            setTimeout(function() { errorToast.style.display = 'none'; }, 3000);
+        }
+
+        function validarAsunto() {
+            var input = document.getElementById('inputAsunto');
+            var msg = document.getElementById('asuntoMsg');
+            var val = input.value.trim();
+            if (val.length === 0) {
+                input.className = 'error'; msg.textContent = 'El asunto es obligatorio'; msg.className = 'validation-msg error';
+            } else if (val.length < 5) {
+                input.className = 'error'; msg.textContent = 'M\u00EDnimo 5 caracteres'; msg.className = 'validation-msg error';
+            } else {
+                input.className = 'valid'; msg.textContent = 'Asunto v\u00E1lido'; msg.className = 'validation-msg ok';
+            }
+            validarFormularioTicket();
+        }
+
+        function validarRemitente() {
+            var input = document.getElementById('inputRemitente');
+            var msg = document.getElementById('remitenteMsg');
+            var val = input.value.trim();
+            if (val.length === 0) {
+                input.className = 'error'; msg.textContent = 'El remitente es obligatorio'; msg.className = 'validation-msg error';
+            } else {
+                input.className = 'valid'; msg.textContent = 'Remitente v\u00E1lido'; msg.className = 'validation-msg ok';
+            }
+            validarFormularioTicket();
+        }
+
+        function validarCategoria() {
+            var select = document.getElementById('inputCategoria');
+            var msg = document.getElementById('categoriaMsg');
+            if (select.value === '') {
+                select.className = 'error'; msg.textContent = 'Seleccione una categor\u00EDa'; msg.className = 'validation-msg error';
+            } else {
+                select.className = 'valid'; msg.textContent = 'Categor\u00EDa v\u00E1lida'; msg.className = 'validation-msg ok';
+            }
+            validarFormularioTicket();
+        }
+
+        function validarPrioridad() {
+            var select = document.getElementById('inputPrioridad');
+            var msg = document.getElementById('prioridadMsg');
+            if (select.value === '') {
+                select.className = 'error'; msg.textContent = 'Seleccione una prioridad'; msg.className = 'validation-msg error';
+            } else {
+                select.className = 'valid'; msg.textContent = 'Prioridad v\u00E1lida'; msg.className = 'validation-msg ok';
+            }
+            validarFormularioTicket();
+        }
+
+        function validarSedeMaquina() {
+            var cat = document.getElementById('inputCategoria').value;
+            var sedeMsg = document.getElementById('sedeMsg');
+            var maqMsg = document.getElementById('maquinaMsg');
+            var sedeOk = true;
+            var maqOk = true;
+
+            if (cat === 'Sedes') {
+                var sedeVal = document.getElementById('inputSede').value;
+                if (sedeVal === '') {
+                    document.getElementById('inputSede').className = 'error';
+                    sedeMsg.textContent = 'Debe seleccionar una sede'; sedeMsg.className = 'validation-msg error';
+                    sedeOk = false;
+                } else {
+                    document.getElementById('inputSede').className = 'valid';
+                    sedeMsg.textContent = 'Sede v\u00E1lida'; sedeMsg.className = 'validation-msg ok';
+                }
+            } else {
+                document.getElementById('inputSede').className = '';
+                sedeMsg.textContent = ''; sedeMsg.className = 'validation-msg';
+            }
+
+            if (cat === 'M\u00E1quinas') {
+                var maqVal = document.getElementById('inputMaquina').value;
+                if (maqVal === '') {
+                    document.getElementById('inputMaquina').className = 'error';
+                    maqMsg.textContent = 'Debe seleccionar una m\u00E1quina'; maqMsg.className = 'validation-msg error';
+                    maqOk = false;
+                } else {
+                    document.getElementById('inputMaquina').className = 'valid';
+                    maqMsg.textContent = 'M\u00E1quina v\u00E1lida'; maqMsg.className = 'validation-msg ok';
+                }
+            } else {
+                document.getElementById('inputMaquina').className = '';
+                maqMsg.textContent = ''; maqMsg.className = 'validation-msg';
+            }
+            validarFormularioTicket();
+        }
+
+        function validarFormularioTicket() {
+            var asuntoOk = document.getElementById('inputAsunto').value.trim().length >= 5;
+            var remitenteOk = document.getElementById('inputRemitente').value.trim().length > 0;
+            var catOk = document.getElementById('inputCategoria').value !== '';
+            var prioOk = document.getElementById('inputPrioridad').value !== '';
+            var cat = document.getElementById('inputCategoria').value;
+            var sedeOk = cat !== 'Sedes' || document.getElementById('inputSede').value !== '';
+            var maqOk = cat !== 'M\u00E1quinas' || document.getElementById('inputMaquina').value !== '';
+            document.querySelector('#formNuevoTicket button[type="submit"]').disabled = !(asuntoOk && remitenteOk && catOk && prioOk && sedeOk && maqOk);
+        }
+
+        function validarEstadoMod() {
+            var select = document.getElementById('modEstado');
+            var msg = document.getElementById('modEstadoMsg');
+            if (select.value === '') {
+                select.className = 'error'; msg.textContent = 'Seleccione un estado'; msg.className = 'validation-msg error';
+                document.querySelector('#formModificarTicket button[type="submit"]').disabled = true;
+            } else {
+                select.className = 'valid'; msg.textContent = 'Estado v\u00E1lido'; msg.className = 'validation-msg ok';
+                document.querySelector('#formModificarTicket button[type="submit"]').disabled = false;
+            }
         }
 
         var ctx = document.getElementById('chartCategorias').getContext('2d');

@@ -32,14 +32,21 @@ public class SedesController {
     @GetMapping("/sedes")
     public String sedes(HttpSession session, Model model) {
         String username = (String) session.getAttribute("username");
-        if (username != null) {
+        if (username == null) {
+            return "redirect:/login";
+        }
+        DatosAdminGW perfil = (DatosAdminGW) session.getAttribute("perfil");
+        if (perfil == null) {
             var datosOpt = datosAdminRepository.findByUsuarioUsername(username);
             if (datosOpt.isPresent()) {
-                DatosAdminGW datos = datosOpt.get();
-                model.addAttribute("perfil", datos);
-                int edad = Period.between(datos.getFechaNacimiento(), LocalDate.now()).getYears();
-                model.addAttribute("edad", edad);
+                perfil = datosOpt.get();
+                session.setAttribute("perfil", perfil);
             }
+        }
+        if (perfil != null) {
+            model.addAttribute("perfil", perfil);
+            int edad = Period.between(perfil.getFechaNacimiento(), LocalDate.now()).getYears();
+            model.addAttribute("edad", edad);
         }
         model.addAttribute("sedes", sedesRepository.findAll());
         model.addAttribute("ubigeos", ubiGeoRepository.findAll());

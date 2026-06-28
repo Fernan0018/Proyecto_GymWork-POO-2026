@@ -548,10 +548,10 @@
         .modal-field input:focus, .modal-field select:focus {
             border-color: #fcd535;
         }
-        .modal-field input.error {
+        .modal-field input.error, .modal-field select.error {
             border-color: #ff4444;
         }
-        .modal-field input.valid {
+        .modal-field input.valid, .modal-field select.valid {
             border-color: #4caf50;
         }
         .modal-field .validation-msg {
@@ -604,6 +604,23 @@
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
             85% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+        .edit-field input.error {
+            border-color: #ff4444 !important;
+        }
+        .edit-field input.valid {
+            border-color: #4caf50 !important;
+        }
+        .edit-field .validation-msg {
+            font-size: 11px;
+            margin-top: 4px;
+            min-height: 15px;
+        }
+        .edit-field .validation-msg.error {
+            color: #ff4444;
+        }
+        .edit-field .validation-msg.ok {
+            color: #4caf50;
         }
     </style>
     <script>
@@ -706,7 +723,8 @@
                     <form id="formSede" action="${pageContext.request.contextPath}/sedes/guardar" method="post">
                         <div class="modal-field">
                             <label>Nombre de la Sede</label>
-                            <input type="text" name="nombre" id="inputNombre" maxlength="100" required>
+                            <input type="text" name="nombre" id="inputNombre" maxlength="100" required oninput="validarNombreSede()">
+                            <div class="validation-msg" id="nombreMsg"></div>
                         </div>
                         <div class="modal-field">
                             <label>UBIGEO</label>
@@ -716,16 +734,18 @@
                         </div>
                         <div class="modal-field">
                             <label>Estado</label>
-                            <select name="estado" id="inputEstado" required>
+                            <select name="estado" id="inputEstado" required onchange="validarEstadoSede()">
                                 <option value="">Seleccionar...</option>
                                 <option value="Activa">Activa</option>
                                 <option value="Inactivo">Inactivo</option>
                                 <option value="Mantenimiento">Mantenimiento</option>
                             </select>
+                            <div class="validation-msg" id="estadoMsg"></div>
                         </div>
                         <div class="modal-field">
                             <label>Aforo Máximo</label>
-                            <input type="number" name="aforo" id="inputAforo" min="1" max="99999" required>
+                            <input type="number" name="aforo" id="inputAforo" min="1" max="99999" required oninput="validarAforoSede()">
+                            <div class="validation-msg" id="aforoMsg"></div>
                         </div>
                         <div class="modal-buttons">
                             <button type="button" class="btn-cancel" onclick="cerrarModal()">CANCELAR</button>
@@ -751,15 +771,18 @@
                         </div>
                         <div class="modal-field">
                             <label>Estado</label>
-                            <select name="estado" id="modEstado" required>
+                            <select name="estado" id="modEstado" required onchange="validarEstadoSedeMod()">
+                                <option value="">Seleccionar...</option>
                                 <option value="Activa">Activa</option>
                                 <option value="Inactivo">Inactivo</option>
                                 <option value="Mantenimiento">Mantenimiento</option>
                             </select>
+                            <div class="validation-msg" id="modEstadoMsg"></div>
                         </div>
                         <div class="modal-field">
                             <label>Aforo Máximo</label>
-                            <input type="number" name="aforo" id="modAforo" min="1" max="99999" required>
+                            <input type="number" name="aforo" id="modAforo" min="1" max="99999" required oninput="validarAforoSedeMod()">
+                            <div class="validation-msg" id="modAforoMsg"></div>
                         </div>
                         <div class="modal-buttons">
                             <button type="button" class="btn-cancel" onclick="cerrarModalModificar()">CANCELAR</button>
@@ -793,7 +816,6 @@
             <div class="error-toast show" id="errorToast">${error}</div>
             </c:if>
 
-            <c:if test="${perfil != null}">
             <div class="modal-overlay" id="modalPerfil">
                 <div class="modal-card" style="width:500px;">
                     <h2>PERFIL DEL ADMINISTRADOR</h2>
@@ -831,13 +853,11 @@
                     </div>
                 </div>
             </div>
-            </c:if>
 
-            <c:if test="${perfil != null}">
             <div class="modal-overlay" id="modalEditPerfil">
                 <div class="modal-card" style="width:500px;">
                     <h2>EDITAR PERFIL</h2>
-                    <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post">
+                    <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post" novalidate>
                         <div class="edit-grid">
                             <div class="edit-field full-width">
                                 <label>DNI</label>
@@ -845,23 +865,23 @@
                             </div>
                             <div class="edit-field">
                                 <label>Nombre</label>
-                                <input type="text" name="nombre" value="${perfil.nombre}" required>
+                                <input type="text" name="nombre" value="${perfil.nombre}">
                             </div>
                             <div class="edit-field">
                                 <label>Apellidos</label>
-                                <input type="text" name="apellidos" value="${perfil.apellidos}" required>
+                                <input type="text" name="apellidos" value="${perfil.apellidos}">
                             </div>
                             <div class="edit-field">
                                 <label>Fecha de Nacimiento</label>
-                                <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}" required>
+                                <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}">
                             </div>
                             <div class="edit-field full-width">
                                 <label>Correo Electrónico</label>
-                                <input type="email" name="correo" value="${perfil.correo}" required>
+                                <input type="email" name="correo" value="${perfil.correo}">
                             </div>
                             <div class="edit-field full-width">
                                 <label>Teléfono</label>
-                                <input type="text" name="telefono" value="${perfil.telefono}" required>
+                                <input type="text" name="telefono" value="${perfil.telefono}">
                             </div>
                             <div class="edit-buttons">
                                 <button type="button" class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
@@ -871,7 +891,6 @@
                     </form>
                 </div>
             </div>
-            </c:if>
 
             <c:if test="${not empty exito}">
             <div class="success-toast show" id="successToast">${exito}</div>
@@ -956,6 +975,15 @@
             document.getElementById('ubigeoMsg').textContent = '';
             document.getElementById('ubigeoMsg').className = 'validation-msg';
             document.getElementById('inputUbigeo').className = '';
+            document.getElementById('inputNombre').className = '';
+            document.getElementById('inputEstado').className = '';
+            document.getElementById('inputAforo').className = '';
+            document.getElementById('nombreMsg').textContent = '';
+            document.getElementById('nombreMsg').className = 'validation-msg';
+            document.getElementById('estadoMsg').textContent = '';
+            document.getElementById('estadoMsg').className = 'validation-msg';
+            document.getElementById('aforoMsg').textContent = '';
+            document.getElementById('aforoMsg').className = 'validation-msg';
             document.getElementById('btnGuardar').disabled = true;
         }
 
@@ -1016,14 +1044,147 @@
                 msg.textContent = 'UBIGEO v\u00E1lido';
                 msg.className = 'validation-msg ok';
                 info.textContent = dep + ' - ' + dis;
-                document.getElementById('btnGuardar').disabled = false;
             } else {
                 input.className = 'error';
                 msg.textContent = 'El c\u00F3digo UBIGEO no existe';
                 msg.className = 'validation-msg error';
                 info.textContent = '';
-                document.getElementById('btnGuardar').disabled = true;
             }
+            validarFormularioSede();
+        }
+
+        function validarNombreSede() {
+            var input = document.getElementById('inputNombre');
+            var msg = document.getElementById('nombreMsg');
+            var val = input.value.trim();
+
+            if (val.length === 0) {
+                input.className = 'error';
+                msg.textContent = 'El nombre de la sede es obligatorio';
+                msg.className = 'validation-msg error';
+                validarFormularioSede();
+                return;
+            }
+
+            if (val.length < 3) {
+                input.className = 'error';
+                msg.textContent = 'El nombre debe tener al menos 3 caracteres';
+                msg.className = 'validation-msg error';
+                validarFormularioSede();
+                return;
+            }
+
+            input.className = 'valid';
+            msg.textContent = 'Nombre v\u00E1lido';
+            msg.className = 'validation-msg ok';
+            validarFormularioSede();
+        }
+
+        function validarEstadoSede() {
+            var select = document.getElementById('inputEstado');
+            var msg = document.getElementById('estadoMsg');
+
+            if (select.value === '') {
+                select.className = 'error';
+                msg.textContent = 'Seleccione un estado';
+                msg.className = 'validation-msg error';
+            } else {
+                select.className = 'valid';
+                msg.textContent = 'Estado v\u00E1lido';
+                msg.className = 'validation-msg ok';
+            }
+            validarFormularioSede();
+        }
+
+        function validarAforoSede() {
+            var input = document.getElementById('inputAforo');
+            var msg = document.getElementById('aforoMsg');
+            var val = parseInt(input.value, 10);
+
+            if (isNaN(val) || val < 1) {
+                input.className = 'error';
+                msg.textContent = 'El aforo debe ser un n\u00FAmero positivo';
+                msg.className = 'validation-msg error';
+                validarFormularioSede();
+                return;
+            }
+
+            if (val > 99999) {
+                input.className = 'error';
+                msg.textContent = 'El aforo no puede superar los 99,999';
+                msg.className = 'validation-msg error';
+                validarFormularioSede();
+                return;
+            }
+
+            input.className = 'valid';
+            msg.textContent = 'Aforo v\u00E1lido';
+            msg.className = 'validation-msg ok';
+            validarFormularioSede();
+        }
+
+        function validarFormularioSede() {
+            var nombreVal = document.getElementById('inputNombre').value.trim().length >= 3;
+            var aforoVal = (function() {
+                var v = parseInt(document.getElementById('inputAforo').value, 10);
+                return !isNaN(v) && v >= 1 && v <= 99999;
+            })();
+            var estadoVal = document.getElementById('inputEstado').value !== '';
+            var ubigeoVal = document.getElementById('inputUbigeo').classList.contains('valid');
+
+            document.getElementById('btnGuardar').disabled = !(nombreVal && aforoVal && estadoVal && ubigeoVal);
+        }
+
+        function validarEstadoSedeMod() {
+            var select = document.getElementById('modEstado');
+            var msg = document.getElementById('modEstadoMsg');
+
+            if (select.value === '') {
+                select.className = 'error';
+                msg.textContent = 'Seleccione un estado';
+                msg.className = 'validation-msg error';
+            } else {
+                select.className = 'valid';
+                msg.textContent = 'Estado v\u00E1lido';
+                msg.className = 'validation-msg ok';
+            }
+            validarFormularioMod();
+        }
+
+        function validarAforoSedeMod() {
+            var input = document.getElementById('modAforo');
+            var msg = document.getElementById('modAforoMsg');
+            var val = parseInt(input.value, 10);
+
+            if (isNaN(val) || val < 1) {
+                input.className = 'error';
+                msg.textContent = 'El aforo debe ser un n\u00FAmero positivo';
+                msg.className = 'validation-msg error';
+                validarFormularioMod();
+                return;
+            }
+
+            if (val > 99999) {
+                input.className = 'error';
+                msg.textContent = 'El aforo no puede superar los 99,999';
+                msg.className = 'validation-msg error';
+                validarFormularioMod();
+                return;
+            }
+
+            input.className = 'valid';
+            msg.textContent = 'Aforo v\u00E1lido';
+            msg.className = 'validation-msg ok';
+            validarFormularioMod();
+        }
+
+        function validarFormularioMod() {
+            var aforoVal = (function() {
+                var v = parseInt(document.getElementById('modAforo').value, 10);
+                return !isNaN(v) && v >= 1 && v <= 99999;
+            })();
+            var estadoVal = document.getElementById('modEstado').value !== '';
+            document.getElementById('formModificar').querySelector('button[type="submit"]').disabled = !(aforoVal && estadoVal);
         }
 
         function abrirModalModificar(id, nombre, departamento, distrito, estado, aforo) {
@@ -1032,11 +1193,24 @@
             document.getElementById('modUbicacion').value = departamento + ' - ' + distrito;
             document.getElementById('modEstado').value = estado;
             document.getElementById('modAforo').value = aforo;
+            document.getElementById('modEstado').className = 'valid';
+            document.getElementById('modAforo').className = 'valid';
+            document.getElementById('modEstadoMsg').textContent = '';
+            document.getElementById('modEstadoMsg').className = 'validation-msg';
+            document.getElementById('modAforoMsg').textContent = '';
+            document.getElementById('modAforoMsg').className = 'validation-msg';
+            document.getElementById('formModificar').querySelector('button[type="submit"]').disabled = false;
             document.getElementById('modalModificar').classList.add('show');
         }
 
         function cerrarModalModificar() {
             document.getElementById('modalModificar').classList.remove('show');
+            document.getElementById('modEstado').className = '';
+            document.getElementById('modAforo').className = '';
+            document.getElementById('modEstadoMsg').textContent = '';
+            document.getElementById('modEstadoMsg').className = 'validation-msg';
+            document.getElementById('modAforoMsg').textContent = '';
+            document.getElementById('modAforoMsg').className = 'validation-msg';
         }
 
         function abrirModalEliminar(id, nombre) {
@@ -1056,6 +1230,83 @@
                 this.classList.add('active');
             });
         });
+    </script>
+    <script>
+        (function() {
+            var c = document.getElementById('modalEditPerfil');
+            if (!c) return;
+            var f = c.querySelector('form');
+            if (!f) return;
+            var rules = {
+                nombre: function(v) {
+                    v = v.trim();
+                    if (v.length < 2) return 'Mínimo 2 caracteres';
+                    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(v)) return 'Solo letras';
+                    return '';
+                },
+                apellidos: function(v) {
+                    v = v.trim();
+                    if (v.length < 2) return 'Mínimo 2 caracteres';
+                    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(v)) return 'Solo letras';
+                    return '';
+                },
+                fechaNacimiento: function(v) {
+                    if (!v) return 'Requerido';
+                    var d = new Date(v + 'T00:00:00');
+                    if (isNaN(d.getTime())) return 'Fecha inválida';
+                    if (d >= new Date()) return 'Debe ser fecha pasada';
+                    return '';
+                },
+                correo: function(v) {
+                    v = v.trim();
+                    if (!v) return 'Requerido';
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Correo inválido';
+                    return '';
+                },
+                telefono: function(v) {
+                    v = v.trim();
+                    if (!v) return 'Requerido';
+                    var digits = v.replace(/\D/g, '');
+                    if (digits.length < 9) return 'Mínimo 9 dígitos';
+                    return '';
+                }
+            };
+            Object.keys(rules).forEach(function(name) {
+                var inp = c.querySelector('input[name="' + name + '"]');
+                if (!inp) return;
+                var field = inp.closest('.edit-field');
+                if (!field) return;
+                var msg = document.createElement('span');
+                msg.className = 'validation-msg';
+                field.appendChild(msg);
+                function check() {
+                    var err = rules[name](inp.value);
+                    if (err) {
+                        inp.classList.remove('valid');
+                        inp.classList.add('error');
+                        msg.textContent = err;
+                        msg.className = 'validation-msg error';
+                    } else {
+                        inp.classList.remove('error');
+                        inp.classList.add('valid');
+                        msg.textContent = '✓';
+                        msg.className = 'validation-msg ok';
+                    }
+                }
+                inp.addEventListener('input', check);
+                inp.addEventListener('blur', check);
+                check();
+            });
+            f.addEventListener('submit', function(e) {
+                var bad = false;
+                Object.keys(rules).forEach(function(name) {
+                    var inp = c.querySelector('input[name="' + name + '"]');
+                    if (!inp) return;
+                    if (rules[name](inp.value)) bad = true;
+                });
+                if (bad) e.preventDefault();
+            });
+        })();
     </script>
 </body>
 </html>
