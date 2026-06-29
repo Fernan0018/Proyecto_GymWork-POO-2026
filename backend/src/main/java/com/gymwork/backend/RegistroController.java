@@ -28,7 +28,7 @@ public class RegistroController {
     } else {
         model.addAttribute(
             "clientes",
-            clientesRepository.findByNombresClienteContainingIgnoreCaseOrCodigoClienteContainingIgnoreCase(
+            clientesRepository.findByNombreContainingIgnoreCaseOrCodigoContainingIgnoreCase(
                     buscar,
                     buscar
                 )

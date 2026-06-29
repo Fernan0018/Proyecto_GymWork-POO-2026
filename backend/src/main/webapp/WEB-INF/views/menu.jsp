@@ -442,7 +442,8 @@
                 onclick="window.location.href='${pageContext.request.contextPath}/soporte'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Soporte.png" alt="Soporte"> Soporte
             </div>
-            <div class="sidebar-item" data-modulo="admin">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/administracion'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Administracion.png" alt="Módulo de Administración"> Módulo de Administración
             </div>
         </nav>
