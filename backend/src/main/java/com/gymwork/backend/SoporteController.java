@@ -166,22 +166,23 @@ public class SoporteController {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
 
+            boolean[] textOpen = {false};
             PDPageContentStream cs = new PDPageContentStream(document, page);
             try {
                 int y = 800;
 
                 cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 22);
-                cs.beginText();
+                cs.beginText(); textOpen[0] = true;
                 cs.newLineAtOffset(50, y);
                 cs.showText("REPORTE DIARIO - MESA DE AYUDA");
-                cs.endText();
+                cs.endText(); textOpen[0] = false;
                 y -= 25;
 
                 cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
-                cs.beginText();
+                cs.beginText(); textOpen[0] = true;
                 cs.newLineAtOffset(50, y);
                 cs.showText("Fecha: " + hoy.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                cs.endText();
+                cs.endText(); textOpen[0] = false;
                 y -= 30;
 
                 int resueltos = tiemposHoy.size();
@@ -199,10 +200,10 @@ public class SoporteController {
                     .max().orElse(0);
 
                 cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 14);
-                cs.beginText();
+                cs.beginText(); textOpen[0] = true;
                 cs.newLineAtOffset(50, y);
                 cs.showText("Resumen");
-                cs.endText();
+                cs.endText(); textOpen[0] = false;
                 y -= 20;
 
                 cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 11);
@@ -213,10 +214,10 @@ public class SoporteController {
                     "Tickets activos pendientes: " + activos.size()
                 };
                 for (String line : resumenLines) {
-                    cs.beginText();
+                    cs.beginText(); textOpen[0] = true;
                     cs.newLineAtOffset(60, y);
                     cs.showText(line);
-                    cs.endText();
+                    cs.endText(); textOpen[0] = false;
                     y -= 18;
                 }
                 y -= 15;
@@ -230,10 +231,10 @@ public class SoporteController {
 
                 if (!tiemposHoy.isEmpty()) {
                     cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 14);
-                    cs.beginText();
+                    cs.beginText(); textOpen[0] = true;
                     cs.newLineAtOffset(50, y);
                     cs.showText("Tickets resueltos del d\u00eda");
-                    cs.endText();
+                    cs.endText(); textOpen[0] = false;
                     y -= 20;
 
                     String[] headers = {"ID", "Asunto", "Categor\u00eda", "Minutos"};
@@ -243,10 +244,10 @@ public class SoporteController {
                     cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 9);
                     float x = xStart;
                     for (int i = 0; i < headers.length; i++) {
-                        cs.beginText();
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
                         cs.showText(headers[i]);
-                        cs.endText();
+                        cs.endText(); textOpen[0] = false;
                         x += colWidths[i];
                     }
                     y -= 16;
@@ -255,37 +256,39 @@ public class SoporteController {
                     for (TiemposTicketGW tt : tiemposHoy) {
                         SoporteGW ticket = ticketMap.get(tt.getIdTicket());
                         if (y < 50) {
+                            if (textOpen[0]) { try { cs.endText(); } catch (Exception ignored) {} textOpen[0] = false; }
                             cs.close();
                             page = new PDPage(PDRectangle.A4);
                             document.addPage(page);
                             cs = new PDPageContentStream(document, page);
+                            cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 9);
                             y = 800;
                         }
                         x = xStart;
-                        cs.beginText();
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
                         cs.showText(String.valueOf(tt.getIdTicket()));
-                        cs.endText();
+                        cs.endText(); textOpen[0] = false;
                         x += colWidths[0];
 
                         String asunto = ticket != null ? ticket.getAsuntoTicket() : "";
-                        if (asunto.length() > 40) asunto = asunto.substring(0, 37) + "...";
-                        cs.beginText();
+                        if (asunto != null && asunto.length() > 40) asunto = asunto.substring(0, 37) + "...";
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
-                        cs.showText(asunto);
-                        cs.endText();
+                        cs.showText(asunto != null ? asunto : "");
+                        cs.endText(); textOpen[0] = false;
                         x += colWidths[1];
 
-                        cs.beginText();
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
                         cs.showText(ticket != null && ticket.getCategoria() != null ? ticket.getCategoria() : "");
-                        cs.endText();
+                        cs.endText(); textOpen[0] = false;
                         x += colWidths[2];
 
-                        cs.beginText();
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
                         cs.showText(String.valueOf(tt.getMinutosResolucion() != null ? tt.getMinutosResolucion() : 0));
-                        cs.endText();
+                        cs.endText(); textOpen[0] = false;
                         y -= 14;
                     }
                     y -= 20;
@@ -293,6 +296,7 @@ public class SoporteController {
 
                 if (!activos.isEmpty()) {
                     if (y < 100) {
+                        if (textOpen[0]) { try { cs.endText(); } catch (Exception ignored) {} textOpen[0] = false; }
                         cs.close();
                         page = new PDPage(PDRectangle.A4);
                         document.addPage(page);
@@ -301,10 +305,10 @@ public class SoporteController {
                     }
 
                     cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 14);
-                    cs.beginText();
+                    cs.beginText(); textOpen[0] = true;
                     cs.newLineAtOffset(50, y);
                     cs.showText("Tickets activos pendientes");
-                    cs.endText();
+                    cs.endText(); textOpen[0] = false;
                     y -= 20;
 
                     String[] actHeaders = {"ID", "Asunto", "Prioridad", "Estado"};
@@ -314,10 +318,10 @@ public class SoporteController {
                     cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 9);
                     float x = xStart;
                     for (int i = 0; i < actHeaders.length; i++) {
-                        cs.beginText();
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
                         cs.showText(actHeaders[i]);
-                        cs.endText();
+                        cs.endText(); textOpen[0] = false;
                         x += actWidths[i];
                     }
                     y -= 16;
@@ -325,41 +329,46 @@ public class SoporteController {
                     cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 9);
                     for (SoporteGW ticket : activos) {
                         if (y < 50) {
+                            if (textOpen[0]) { try { cs.endText(); } catch (Exception ignored) {} textOpen[0] = false; }
                             cs.close();
                             page = new PDPage(PDRectangle.A4);
                             document.addPage(page);
                             cs = new PDPageContentStream(document, page);
+                            cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 9);
                             y = 800;
                         }
                         x = xStart;
-                        cs.beginText();
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
                         cs.showText(String.valueOf(ticket.getIdTicket()));
-                        cs.endText();
+                        cs.endText(); textOpen[0] = false;
                         x += actWidths[0];
 
                         String asunto = ticket.getAsuntoTicket();
-                        if (asunto.length() > 40) asunto = asunto.substring(0, 37) + "...";
-                        cs.beginText();
+                        if (asunto != null && asunto.length() > 40) asunto = asunto.substring(0, 37) + "...";
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
-                        cs.showText(asunto);
-                        cs.endText();
+                        cs.showText(asunto != null ? asunto : "");
+                        cs.endText(); textOpen[0] = false;
                         x += actWidths[1];
 
-                        cs.beginText();
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
                         cs.showText(ticket.getPrioridad() != null ? ticket.getPrioridad() : "");
-                        cs.endText();
+                        cs.endText(); textOpen[0] = false;
                         x += actWidths[2];
 
-                        cs.beginText();
+                        cs.beginText(); textOpen[0] = true;
                         cs.newLineAtOffset(x, y);
-                        cs.showText(ticket.getEstadoTicket());
-                        cs.endText();
+                        cs.showText(ticket.getEstadoTicket() != null ? ticket.getEstadoTicket() : "");
+                        cs.endText(); textOpen[0] = false;
                         y -= 14;
                     }
                 }
             } finally {
+                if (textOpen[0]) {
+                    try { cs.endText(); } catch (Exception ignored) {}
+                }
                 cs.close();
             }
 
