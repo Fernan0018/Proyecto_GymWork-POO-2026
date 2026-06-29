@@ -169,11 +169,11 @@
         }
         .stat-total .stat-value { color: #fcd535; }
         .stat-operativas .stat-value { color: #5ddb6e; }
-        .stat-revision .stat-value { color: #fcd535; }
+        .stat-reparacion .stat-value { color: #ff9800; }
         .stat-inactivas .stat-value { color: #dc3545; }
         .stat-total { border-top: 4px solid #fcd535; }
         .stat-operativas { border-top: 4px solid #5ddb6e; }
-        .stat-revision { border-top: 4px solid #fcd535; }
+        .stat-reparacion { border-top: 4px solid #ff9800; }
         .stat-inactivas { border-top: 4px solid #dc3545; }
         .module-actions {
             display: flex;
@@ -315,10 +315,10 @@
             color: #5ddb6e;
             border-color: rgba(40,167,69,0.4);
         }
-        .badge-revision {
-            background: rgba(252,213,53,0.12);
-            color: #fcd535;
-            border-color: rgba(252,213,53,0.4);
+        .badge-reparacion {
+            background: rgba(255,152,0,0.12);
+            color: #ff9800;
+            border-color: rgba(255,152,0,0.4);
         }
         .badge-inactiva {
             background: rgba(220,53,69,0.12);
@@ -723,7 +723,7 @@
                 <img src="${pageContext.request.contextPath}/User_Profile.jpg" alt="Perfil">
             </button>
             <div class="dropdown-menu" id="menuDesplegable">
-                <button class="dropdown-item" onclick="verPerfil()">VER PERFIL</button>
+                <button class="dropdown-item" onclick="verSil()">VER PERFIL</button>
                 <button class="dropdown-item" onclick="cerrarSesion()">CERRAR SESI&Oacute;N</button>
             </div>
         </div>
@@ -767,10 +767,10 @@
                         <div class="stat-value">${totalOperativas}</div>
                         <div class="stat-label">Operativas</div>
                     </div>
-                    <div class="stat-card stat-revision">
+                    <div class="stat-card stat-reparacion">
                         <div class="stat-icon">&#9888;</div>
                         <div class="stat-value">${totalMantenimiento}</div>
-                        <div class="stat-label">En Revisi&oacute;n</div>
+                        <div class="stat-label">En Reparaci&oacute;n</div>
                     </div>
                     <div class="stat-card stat-inactivas">
                         <div class="stat-icon">&#10007;</div>
@@ -816,8 +816,8 @@
                                                 <c:when test="${m.estadoMaquina == 'Operativa'}">
                                                     <span class="badge badge-operativa">Operativa</span>
                                                 </c:when>
-                                                <c:when test="${m.estadoMaquina == 'Revisión'}">
-                                                    <span class="badge badge-revision">Revisi&oacute;n</span>
+                                                <c:when test="${m.estadoMaquina == 'En Reparación' || m.estadoMaquina == 'Revisión' || m.estadoMaquina == 'Mantenimiento'}">
+                                                    <span class="badge badge-reparacion">En Reparaci&oacute;n</span>
                                                 </c:when>
                                                 <c:when test="${m.estadoMaquina == 'Inactiva'}">
                                                     <span class="badge badge-inactiva">Inactiva</span>
@@ -877,7 +877,7 @@
                                 <select name="estadoMaquina" id="mEstado" required>
                                     <option value="">Seleccionar...</option>
                                     <option value="Operativa">Operativa</option>
-                                    <option value="Revisi&oacute;n">Revisi&oacute;n</option>
+                                    <option value="En Reparaci&oacute;n">En Reparaci&oacute;n</option>
                                     <option value="Inactiva">Inactiva</option>
                                 </select>
                             </div>
@@ -977,8 +977,9 @@
         }
 
         function verPerfil() {
+            var wc = document.getElementById('welcomeContainer');
+            if (wc) wc.style.display = 'none';
             document.getElementById('profileCard').classList.add('visible');
-            document.getElementById('welcomeContainer')?.style.display = 'none';
         }
 
         function cerrarPerfil() {
@@ -1039,22 +1040,18 @@
             document.getElementById('modalMaquina').classList.add('show');
         }
 
-        function abrirModalEditar(btn) {
-            var tr = btn.closest('tr');
-            var d = tr.dataset;
+        function abrirModalEditar(btn) { var tr = btn.closest('tr'); var d = tr.dataset; 
             document.getElementById('modalMaquinaTitulo').textContent = 'ACTUALIZAR EQUIPO';
-            document.getElementById('formMaquina').action = '${pageContext.request.contextPath}/maquinas/actualizar';
-            document.getElementById('mId').value = d.id;
-            document.getElementById('mIdDisplay').value = d.id;
-            document.getElementById('mIdDisplay').placeholder = '';
-            document.getElementById('mNombre').value = d.nombre;
-            document.getElementById('mSede').value = d.idSede || '';
-            document.getElementById('mEstado').value = d.estado;
-            document.getElementById('mMantenimiento').value = d.ultimoMantenimiento || '';
-            document.getElementById('btnGuardarMaquina').textContent = 'ACTUALIZAR';
-            document.getElementById('btnCerrarMaquina').textContent = 'CANCELAR';
-            document.getElementById('modalMaquina').classList.add('show');
-        }
+            document.getElementById('formMaquina').action = '${pageContext.request.contextPath}/maquinas/actualizar'; 
+            document.getElementById('mId').value = d.id; document.getElementById('mIdDisplay').value = d.id; 
+            document.getElementById('mIdDisplay').placeholder = ''; 
+            document.getElementById('mNombre').value = d.nombre; 
+            document.getElementById('mSede').value = d.idSede || ''; 
+            document.getElementById('mEstado').value = d.estado === 'Revisi\u00F3n' || d.estado === 'Mantenimiento' ? 'En Reparaci\u00F3n' : d.estado; 
+            document.getElementById('mMantenimiento').value = d.ultimoMantenimiento || ''; 
+            document.getElementById('btnGuardarMaquina').textContent = 'ACTUALIZAR'; 
+            document.getElementById('btnCerrarMaquina').textContent = 'CANCELAR'; 
+            document.getElementById('modalMaquina').classList.add('show'); }
 
         function cerrarModalMaquina() {
             document.getElementById('modalMaquina').classList.remove('show');

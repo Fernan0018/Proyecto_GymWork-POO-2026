@@ -705,7 +705,14 @@
                         <td>${c.codigo}</td>
                         <td>${c.nombre}</td>
                         <td>${c.apellidoPaterno} ${c.apellidoMaterno}</td>
-                        <td>${c.tipoPlan}</td>
+                        <td>
+                                            <c:choose>
+                                                <c:when test="${c.tipoPlan == '001'}">Paquete Fit</c:when>
+                                                <c:when test="${c.tipoPlan == '010'}">Paquete B&aacute;sico</c:when>
+                                                <c:when test="${c.tipoPlan == '100'}">Plan Premium</c:when>
+                                                <c:otherwise>${c.tipoPlan}</c:otherwise>
+                                            </c:choose>
+                                        </td>
                         <td>${c.fechaRegistro}</td>
                         <td style="white-space:nowrap;">
                             <button class="action-btn-sm" onclick="abrirModalVisualizar(this)">&#128065; VER</button>
@@ -766,11 +773,11 @@
                     </div>
                     <div class="modal-field full-width">
                         <label>Tipo de Plan</label>
-                        <select name="tipoPlan" id="sTipoPlan">
-                            <option value="001">Paquete Fit (001)</option>
-                            <option value="010">Paquete Básico (010)</option>
-                            <option value="100">Plan Premium (100)</option>
-                        </select>
+                            <select name="tipoPlan" id="sTipoPlan">
+                                    <option value="001">Paquete Fit</option>
+                                    <option value="010">Paquete B&aacute;sico</option>
+                                    <option value="100">Plan Premium</option>
+                                </select>
                     </div>
                     <div class="modal-field">
                         <label>Departamento</label>

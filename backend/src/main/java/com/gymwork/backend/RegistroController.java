@@ -57,17 +57,47 @@ public class RegistroController {
     }
 
     @PostMapping("/registro/actualizar")
-    public String actualizarCliente(@ModelAttribute ClientesGW cliente, RedirectAttributes redirect) {
-        clientesRepository.save(cliente);
-        redirect.addFlashAttribute("exito", "Cliente actualizado correctamente");
-        return "redirect:/registro";
-    }
+    public String actualizarCliente(@ModelAttribute ClientesGW cliente,
+                                    RedirectAttributes redirect) {
+
+                ClientesGW existente = clientesRepository.findById(cliente.getCodigo())
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+
+            existente.setNombre(cliente.getNombre());
+            existente.setApellidoPaterno(cliente.getApellidoPaterno());
+            existente.setApellidoMaterno(cliente.getApellidoMaterno());
+            existente.setFechaNacimiento(cliente.getFechaNacimiento());
+            existente.setSexo(cliente.getSexo());
+            existente.setCorreo(cliente.getCorreo());
+            existente.setTelefono(cliente.getTelefono());
+            existente.setTipoPlan(cliente.getTipoPlan());
+            existente.setDepartamento(cliente.getDepartamento());
+            existente.setCiudad(cliente.getCiudad());
+            existente.setCalle(cliente.getCalle());
+
+            // NO modificar idSede
+
+            clientesRepository.save(existente);
+
+            redirect.addFlashAttribute("exito", "Cliente actualizado correctamente");
+            return "redirect:/registro";
+            }
 
     @PostMapping("/registro/eliminar")
-    public String eliminarCliente(@RequestParam String codigo, RedirectAttributes redirect) {
-        clientesRepository.deleteById(codigo);
-        redirect.addFlashAttribute("exito", "Cliente eliminado correctamente");
-        return "redirect:/registro";
+    public String eliminarCliente(String codigo, RedirectAttributes redirect) {
+
+            try {
+                clientesRepository.deleteById(codigo);
+                redirect.addFlashAttribute("exito", "Cliente eliminado");
+
+            } catch (Exception e) {
+                redirect.addFlashAttribute(
+                    "error",
+                    "No se puede eliminar el cliente porque tiene pagos registrados."
+                );
+            }
+
+            return "redirect:/registro";
     }
 
     @GetMapping("/registro/reporte/pdf")
@@ -178,7 +208,7 @@ public class RegistroController {
                     c.getNombre() != null ? c.getNombre() : "",
                     apellidos,
                     edadStr,
-                    c.getTipoPlan() != null ? c.getTipoPlan() : "",
+                    c.getTipoPlan() != null ? mapPlanNombre(c.getTipoPlan()) : "",
                     c.getCorreo() != null ? c.getCorreo() : "",
                     c.getTelefono() != null ? c.getTelefono() : "",
                     c.getFechaRegistro() != null ? c.getFechaRegistro().toString() : ""
@@ -208,6 +238,16 @@ public class RegistroController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    private String mapPlanNombre(String tipoPlan) {
+        if (tipoPlan == null) return "";
+        switch (tipoPlan) {
+            case "001": return "Paquete Fit";
+            case "010": return "Paquete B\u00E1sico";
+            case "100": return "Plan Premium";
+            default: return tipoPlan;
         }
     }
 
