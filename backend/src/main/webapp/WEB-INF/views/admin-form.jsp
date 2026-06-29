@@ -25,7 +25,7 @@
             border: 1px solid #333;
             border-radius: 12px;
             padding: 40px;
-            width: 480px;
+            width: 600px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.6);
         }
         .form-title {
@@ -49,7 +49,8 @@
             display: block;
             margin-bottom: 6px;
         }
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 10px 12px;
             background: #2a2a2a;
@@ -60,9 +61,33 @@
             font-size: 14px;
             transition: border-color 0.2s;
         }
-        .form-group input:focus {
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .form-group select option {
+            background: #2a2a2a;
+            color: #fff;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #fcd535;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            color: #fcd535;
+            margin: 20px 0 15px 0;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
         }
         .form-actions {
             display: flex;
@@ -112,6 +137,8 @@
             <c:if test="${modo == 'Modificar'}">
                 <form:hidden path="idUsuario"/>
             </c:if>
+
+            <div class="section-title">DATOS DE USUARIO</div>
             <div class="form-group">
                 <label for="username">Usuario</label>
                 <form:input path="username" id="username" required="required"/>
@@ -120,12 +147,48 @@
                 <label for="password">Contraseña</label>
                 <form:password path="password" id="password" required="required" showPassword="true"/>
             </div>
+
             <c:if test="${modo == 'Registrar'}">
+                <div class="section-title">DATOS DEL ADMINISTRADOR</div>
                 <div class="form-group">
-                    <label for="deletePassword">Contraseña de Eliminación</label>
-                    <form:password path="deletePassword" id="deletePassword" showPassword="true"/>
+                    <label for="dni">DNI</label>
+                    <input type="text" name="dni" id="dni" required="required" maxlength="8"/>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre">Nombres</label>
+                        <input type="text" name="nombre" id="nombre" required="required"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="apellidos">Apellidos</label>
+                        <input type="text" name="apellidos" id="apellidos" required="required"/>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                        <input type="date" name="fechaNacimiento" id="fechaNacimiento" required="required"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="text" name="telefono" id="telefono" required="required"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="correo">Correo Electrónico</label>
+                    <input type="email" name="correo" id="correo" required="required"/>
+                </div>
+                <div class="form-group">
+                    <label for="idSede">Sede</label>
+                    <select name="idSede" id="idSede" required="required">
+                        <option value="">Seleccione una sede...</option>
+                        <c:forEach var="sede" items="${sedes}">
+                            <option value="${sede.idSede}">${sede.nombreSede}</option>
+                        </c:forEach>
+                    </select>
                 </div>
             </c:if>
+
             <div class="form-actions">
                 <button type="submit" class="btn-primary">${modo}</button>
                 <a href="${pageContext.request.contextPath}/administracion" class="btn-cancel">Cancelar</a>

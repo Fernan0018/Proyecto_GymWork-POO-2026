@@ -43,6 +43,10 @@ public class DatosAdminGW {
     @JsonProperty("telefono")
     private String telefono;
 
+    @Column(name = "Id_Sede")
+    @JsonProperty("idSede")
+    private Integer idSede;
+
     public DatosAdminGW() {}
 
     public String getDni() { return dni; }
@@ -64,4 +68,7 @@ public class DatosAdminGW {
 
     public String getTelefono() { return telefono; }
     public void setTelefono(String telefono) { this.telefono = telefono; }
+
+    public Integer getIdSede() { return idSede; }
+    public void setIdSede(Integer idSede) { this.idSede = idSede; }
 }

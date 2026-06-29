@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Controller
 public class AdministracionController {
 
@@ -30,6 +32,9 @@ public class AdministracionController {
 
     @Autowired
     private DatosAdminGWRepository datosAdminRepository;
+
+    @Autowired
+    private SedesGWRepository sedesRepository;
 
     @GetMapping("/administracion")
     public String verAdministracion(HttpSession session, Model model) {
@@ -130,12 +135,35 @@ public class AdministracionController {
         model.addAttribute("usuario", new UsuariosGW());
         model.addAttribute("modo", "Registrar");
         model.addAttribute("accion", "registrar-admin");
+        model.addAttribute("sedes", sedesRepository.findAll());
         return "admin-form";
     }
 
     @PostMapping("/administracion/registrar-admin")
-    public String guardarAdmin(UsuariosGW usuario) {
-        usuariosRepository.save(usuario);
+    @Transactional
+    public String guardarAdmin(
+            UsuariosGW usuario,
+            @RequestParam("dni") String dni,
+            @RequestParam("nombre") String nombre,
+            @RequestParam("apellidos") String apellidos,
+            @RequestParam("fechaNacimiento") String fechaNacimiento,
+            @RequestParam("correo") String correo,
+            @RequestParam("telefono") String telefono,
+            @RequestParam("idSede") Integer idSede) {
+        usuario.setDeletePassword("123456");
+        UsuariosGW saved = usuariosRepository.save(usuario);
+
+        DatosAdminGW datos = new DatosAdminGW();
+        datos.setDni(dni);
+        datos.setUsuario(saved);
+        datos.setNombre(nombre);
+        datos.setApellidos(apellidos);
+        datos.setFechaNacimiento(LocalDate.parse(fechaNacimiento));
+        datos.setCorreo(correo);
+        datos.setTelefono(telefono);
+        datos.setIdSede(idSede);
+        datosAdminRepository.save(datos);
+
         return "redirect:/administracion";
     }
 
@@ -159,7 +187,13 @@ public class AdministracionController {
     }
 
     @GetMapping("/administracion/eliminar-admin")
+    @Transactional
     public String eliminarAdmin(@RequestParam("id") Integer id) {
+        Optional<UsuariosGW> optUser = usuariosRepository.findById(id);
+        if (optUser.isPresent()) {
+            datosAdminRepository.findByUsuarioUsername(optUser.get().getUsername())
+                .ifPresent(datos -> datosAdminRepository.delete(datos));
+        }
         usuariosRepository.deleteById(id);
         return "redirect:/administracion";
     }
