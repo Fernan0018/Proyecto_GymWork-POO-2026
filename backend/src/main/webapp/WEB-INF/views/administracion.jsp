@@ -239,12 +239,20 @@
             font-size: 32px;
         }
         .plan-badge {
-            display: inline-block;
-            padding: 3px 10px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px 14px;
             border-radius: 4px;
             font-family: 'Montserrat', sans-serif;
             font-size: 14px;
             font-weight: 700;
+            line-height: 1.2;
+        }
+        .plan-label {
+            font-size: 10px;
+            font-weight: 400;
+            margin-top: 2px;
         }
         .plan-basico {
             background: rgba(252,213,53,0.15);
@@ -674,11 +682,11 @@
                         <div class="stat-icon">📋</div>
                         <div class="stat-body">
                             <span class="stat-label">Membresías Activas</span>
-                            <span class="stat-value">
-                                <span class="plan-badge plan-basico">${basicosActivos}</span>
-                                <span class="plan-badge plan-fit">${fitsActivos}</span>
-                                <span class="plan-badge plan-premium">${premiumsActivos}</span>
-                            </span>
+                                <span class="stat-value">
+                                    <span class="plan-badge plan-basico">${basicosActivos}<span class="plan-label">Básico</span></span>
+                                    <span class="plan-badge plan-fit">${fitsActivos}<span class="plan-label">Fit</span></span>
+                                    <span class="plan-badge plan-premium">${premiumsActivos}<span class="plan-label">Premium</span></span>
+                                </span>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -731,7 +739,9 @@
                                         <th>Nombre</th>
                                         <th>Plan</th>
                                         <th>Fecha Registro</th>
+                                        <th>Último Pago</th>
                                         <th>Estado</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -748,8 +758,15 @@
                                                 </c:choose>
                                             </td>
                                             <td>${cl.fechaRegistro}</td>
+                                            <td>${ultimoPagoMap[cl.codigo]}</td>
                                             <td>
                                                 <span class="badge ${estadosMap[cl.codigo] == 'Activo' ? 'badge-activo' : 'badge-vencido'}">${estadosMap[cl.codigo]}</span>
+                                            </td>
+                                            <td>
+                                                <form action="/administracion/renovar" method="POST" style="margin:0">
+                                                    <input type="hidden" name="codigoCliente" value="${cl.codigo}">
+                                                    <button type="submit" class="btn-mod">RENOVAR</button>
+                                                </form>
                                             </td>
                                         </tr>
                                     </c:forEach>
@@ -759,43 +776,34 @@
                     </div>
 
                     <div class="admin-table-card">
-                        <h2 class="card-title">PAGOS</h2>
-                        <form action="/administracion/renovar" method="POST">
-                            <div class="table-wrapper">
-                                <table class="table-registro">
-                                    <thead>
+                        <h2 class="card-title">HISTORIAL DE PAGOS</h2>
+                        <div class="table-wrapper">
+                            <table class="table-registro">
+                                <thead>
+                                    <tr>
+                                        <th>Código Cliente</th>
+                                        <th>Plan</th>
+                                        <th>Fecha de Pago</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="p" items="${pagos}">
                                         <tr>
-                                            <th>Seleccionar</th>
-                                            <th>Código Cliente</th>
-                                            <th>Plan</th>
-                                            <th>Fecha Registro</th>
+                                            <td>${p.codigoCliente}</td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${p.tipoPlan == '100'}">Premium</c:when>
+                                                    <c:when test="${p.tipoPlan == '010'}">Básico</c:when>
+                                                    <c:when test="${p.tipoPlan == '001'}">Fit</c:when>
+                                                    <c:otherwise>${p.tipoPlan}</c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td>${p.fechaPago}</td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        <c:forEach var="p" items="${pagos}">
-                                            <tr>
-                                                <td class="radio-cell">
-                                                    <input type="radio" name="idPagoSeleccionado" value="${p.idPago}" class="gold-radio">
-                                                </td>
-                                                <td>${p.codigoCliente}</td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${p.tipoPlan == '100'}">Premium</c:when>
-                                                        <c:when test="${p.tipoPlan == '010'}">Básico</c:when>
-                                                        <c:when test="${p.tipoPlan == '001'}">Fit</c:when>
-                                                        <c:otherwise>${p.tipoPlan}</c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>${p.fechaPago}</td>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="pagos-footer">
-                                <button type="submit" class="btn-renovar">RENOVAR</button>
-                            </div>
-                        </form>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -23,7 +23,7 @@ public class ClientesGW {
     @Transient
     private Integer edad;
     
-    @Column(name = "Fecha_Registro", insertable = false, updatable = false)
+    @Column(name = "Fecha_Registro")
     private Date fechaRegistro;
     
     @Column(name = "Sexo")

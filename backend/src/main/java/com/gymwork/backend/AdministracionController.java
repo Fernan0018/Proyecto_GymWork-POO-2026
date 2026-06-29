@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
@@ -66,36 +67,35 @@ public class AdministracionController {
         for (PagosGW pago : todosLosPagos) {
             String plan = pago.getTipoPlan();
 
-            if ("100".equals(plan)) gananciaTotal += 90;
-            else if ("010".equals(plan)) gananciaTotal += 110;
-            else if ("001".equals(plan)) gananciaTotal += 130;
+            if ("010".equals(plan)) gananciaTotal += 90;
+            else if ("001".equals(plan)) gananciaTotal += 110;
+            else if ("100".equals(plan)) gananciaTotal += 130;
+        }
 
+        Map<String, LocalDate> ultimoPagoMap = new HashMap<>();
+        for (PagosGW pago : todosLosPagos) {
             if (pago.getFechaPago() != null) {
-                LocalDate fechaPagoLocal = pago.getFechaPago().toLocalDate();
-                long diasPasados = ChronoUnit.DAYS.between(fechaPagoLocal, hoy);
-
-                if (diasPasados <= 30) {
-                    if ("100".equals(plan)) basicosActivos++;
-                    else if ("010".equals(plan)) fitsActivos++;
-                    else if ("001".equals(plan)) premiumsActivos++;
+                LocalDate fechaPago = pago.getFechaPago().toLocalDate();
+                String codigo = pago.getCodigoCliente();
+                LocalDate existente = ultimoPagoMap.get(codigo);
+                if (existente == null || fechaPago.isAfter(existente)) {
+                    ultimoPagoMap.put(codigo, fechaPago);
                 }
             }
         }
 
         Map<String, String> estadosMap = new HashMap<>();
         for (ClientesGW cliente : todosLosClientes) {
-            boolean activo = false;
-            for (PagosGW pago : todosLosPagos) {
-                if (pago.getCodigoCliente() != null && pago.getCodigoCliente().equals(cliente.getCodigo())
-                        && pago.getFechaPago() != null) {
-                    long dias = ChronoUnit.DAYS.between(pago.getFechaPago().toLocalDate(), hoy);
-                    if (dias <= 30) {
-                        activo = true;
-                        break;
-                    }
-                }
-            }
+            LocalDate ultimoPago = ultimoPagoMap.get(cliente.getCodigo());
+            boolean activo = ultimoPago != null && ChronoUnit.DAYS.between(ultimoPago, hoy) <= 30;
             estadosMap.put(cliente.getCodigo(), activo ? "Activo" : "Vencido");
+
+            if (activo) {
+                String plan = cliente.getTipoPlan();
+                if ("010".equals(plan)) basicosActivos++;
+                else if ("001".equals(plan)) fitsActivos++;
+                else if ("100".equals(plan)) premiumsActivos++;
+            }
         }
 
         model.addAttribute("gananciaTotal", gananciaTotal);
@@ -106,16 +106,20 @@ public class AdministracionController {
         model.addAttribute("clientes", todosLosClientes);
         model.addAttribute("pagos", todosLosPagos);
         model.addAttribute("estadosMap", estadosMap);
+        model.addAttribute("ultimoPagoMap", ultimoPagoMap);
 
         return "administracion";
     }
 
     @PostMapping("/administracion/renovar")
-    public String renovarMembresia(@RequestParam("idPagoSeleccionado") Long idPagoSeleccionado) {
-        Optional<PagosGW> optPago = pagosRepository.findById(idPagoSeleccionado);
-        if (optPago.isPresent()) {
-            PagosGW pagoOriginal = optPago.get();
-            PagosGW nuevoPago = new PagosGW(pagoOriginal.getCodigoCliente(), pagoOriginal.getTipoPlan());
+    public String renovarMembresia(@RequestParam("codigoCliente") String codigoCliente) {
+        Optional<ClientesGW> optCliente = clientesRepository.findById(codigoCliente);
+        if (optCliente.isPresent()) {
+            ClientesGW cliente = optCliente.get();
+            cliente.setFechaRegistro(Date.valueOf(LocalDate.now()));
+            clientesRepository.save(cliente);
+
+            PagosGW nuevoPago = new PagosGW(cliente.getCodigo(), cliente.getTipoPlan());
             pagosRepository.save(nuevoPago);
         }
         return "redirect:/administracion";
