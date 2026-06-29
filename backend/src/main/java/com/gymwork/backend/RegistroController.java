@@ -105,8 +105,6 @@ public class RegistroController {
             existente.setCalle(cliente.getCalle());
             existente.setEdad(cliente.getEdad());
 
-            // NO modificar idSede
-
             clientesRepository.save(existente);
 
             redirect.addFlashAttribute("exito", "Cliente actualizado correctamente");

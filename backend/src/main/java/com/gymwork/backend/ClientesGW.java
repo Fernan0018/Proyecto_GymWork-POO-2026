@@ -53,7 +53,6 @@ public class ClientesGW {
     @Column(name = "Id_Sede")
     private Integer idSede;
 
-    // --- GETTERS Y SETTERS ---
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
     

@@ -14,29 +14,24 @@ import java.util.Map;
 @Controller
 public class SuscripcionesController {
 
-    // Aquí inyectamos los accesos a tus dos tablas de la Base de Datos
     @Autowired
     private ClientesGWRepository clientesRepository;
 
     @Autowired
     private PagosGWRepository pagosRepository;
 
-    // 1. Esta ruta muestra tu formulario web (Sustituye al JFrame visible)
     @GetMapping("/suscripciones")
     public String mostrarFormularioSuscripciones(Model model) {
         model.addAttribute("cliente", new ClientesGW());
-        return "suscripciones"; // Buscará tu archivo suscripciones.jsp
+        return "suscripciones";
     }
 
-    // 2. Esta ruta recibe los datos cuando le das al botón "Aceptar" (AJAX/Fetch)
     @PostMapping("/suscripciones/guardar")
     public ResponseEntity<Map<String, Object>> registrarSuscripcionWeb(@ModelAttribute("cliente") ClientesGW cliente) {
         try {
-            // Paso A: Asigna sede por defecto y guarda los datos en la tabla ClientesGW
             cliente.setIdSede(1);
             clientesRepository.save(cliente);
 
-            // Paso B: Genera el registro automático en la tabla PagosGW
             PagosGW pago = new PagosGW(
                 cliente.getCodigo(),
                 cliente.getTipoPlan()
