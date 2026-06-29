@@ -1389,7 +1389,7 @@
         }
 
         function mostrarCampoCategoria() {
-            var cat = document.getElementById('categoriaSelect').value;
+            var cat = document.getElementById('inputCategoria').value;
             document.getElementById('campoSede').style.display = cat === 'Sedes' ? 'block' : 'none';
             document.getElementById('campoMaquina').style.display = cat === 'Máquinas' ? 'block' : 'none';
         }
