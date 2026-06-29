@@ -473,26 +473,34 @@
             object-fit: contain;
             flex-shrink: 0;
         }
-        .profile-card {
+        .modal-overlay {
             display: none;
-            background-color: #1e1e1e;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-card {
+            background: #1e1e1e;
             border: 1px solid #333;
             border-radius: 12px;
-            padding: 40px 50px;
+            padding: 35px 40px;
             width: 500px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-            position: relative;
-            z-index: 2;
-            margin: 0 auto;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
         }
-        .profile-card.visible {
-            display: block;
-        }
-        .profile-card h2 {
+        .modal-card h2 {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 28px;
             color: #fcd535;
-            margin: 0 0 30px 0;
+            margin: 0 0 25px 0;
             text-align: center;
             letter-spacing: 2px;
         }
@@ -558,29 +566,6 @@
         }
         .profile-edit-btn:hover {
             background: #e6c12e;
-        }
-        .edit-card {
-            display: none;
-            background-color: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 40px 50px;
-            width: 500px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-            position: relative;
-            z-index: 2;
-            margin: 0 auto;
-        }
-        .edit-card.visible {
-            display: block;
-        }
-        .edit-card h2 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px;
-            color: #fcd535;
-            margin: 0 0 30px 0;
-            text-align: center;
-            letter-spacing: 2px;
         }
         .edit-grid {
             display: grid;
@@ -723,7 +708,7 @@
                 <img src="${pageContext.request.contextPath}/User_Profile.jpg" alt="Perfil">
             </button>
             <div class="dropdown-menu" id="menuDesplegable">
-                <button class="dropdown-item" onclick="verSil()">VER PERFIL</button>
+                <button class="dropdown-item" onclick="verPerfil()">VER PERFIL</button>
                 <button class="dropdown-item" onclick="cerrarSesion()">CERRAR SESI&Oacute;N</button>
             </div>
         </div>
@@ -732,22 +717,30 @@
     <div class="dashboard-layout">
         <nav class="sidebar">
             <div class="sidebar-header">M&Oacute;DULOS</div>
-            <div class="sidebar-item" data-modulo="suscripciones">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/menu'">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Men&uacute; Principal"> Men&uacute; Principal
+            </div>
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/menu?modulo=suscripciones'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Suscripciones"> Suscripciones
             </div>
-            <div class="sidebar-item" onclick="window.location.href='${pageContext.request.contextPath}/registro'">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/registro'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Registro.png" alt="Registro"> Registro
+            </div>
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/sedes'">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Sedes.png" alt="Sedes"> Sedes
             </div>
             <div class="sidebar-item active" onclick="window.location.href='${pageContext.request.contextPath}/maquinas'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Maquinas.png" alt="Estado de M&aacute;quinas"> Estado de M&aacute;quinas
             </div>
-            <div class="sidebar-item" onclick="window.location.href='${pageContext.request.contextPath}/sedes'">
-                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Sedes.png" alt="Sedes"> Sedes
-            </div>
             <div class="sidebar-item" onclick="window.location.href='${pageContext.request.contextPath}/soporte'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Soporte.png" alt="Soporte"> Soporte
             </div>
-            <div class="sidebar-item" data-modulo="admin">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/administracion'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Administracion.png" alt="M&oacute;dulo de Administraci&oacute;n"> M&oacute;dulo de Administraci&oacute;n
             </div>
         </nav>
@@ -911,6 +904,44 @@
                 </div>
             </div>
 
+            <div class="modal-overlay" id="modalEditPerfil">
+                <div class="modal-card">
+                    <h2>EDITAR PERFIL</h2>
+                    <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post" novalidate>
+                        <div class="edit-grid">
+                            <div class="edit-field full-width">
+                                <label>DNI</label>
+                                <input type="text" name="dni" value="${perfil.dni}" readonly>
+                            </div>
+                            <div class="edit-field">
+                                <label>Nombre</label>
+                                <input type="text" name="nombre" value="${perfil.nombre}">
+                            </div>
+                            <div class="edit-field">
+                                <label>Apellidos</label>
+                                <input type="text" name="apellidos" value="${perfil.apellidos}">
+                            </div>
+                            <div class="edit-field">
+                                <label>Fecha de Nacimiento</label>
+                                <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}">
+                            </div>
+                            <div class="edit-field full-width">
+                                <label>Correo Electrónico</label>
+                                <input type="email" name="correo" value="${perfil.correo}">
+                            </div>
+                            <div class="edit-field full-width">
+                                <label>Teléfono</label>
+                                <input type="text" name="telefono" value="${perfil.telefono}">
+                            </div>
+                            <div class="edit-buttons">
+                                <button type="button" class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
+                                <button type="submit" class="btn-save">GUARDAR</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <c:if test="${not empty error}">
             <div class="error-toast show" id="errorToast">${error}</div>
             </c:if>
@@ -919,43 +950,43 @@
             <div class="success-toast show" id="successToast">${exito}</div>
             </c:if>
 
-            <c:if test="${perfil != null}">
-            <div class="profile-card" id="profileCard">
-                <h2>PERFIL DEL ADMINISTRADOR</h2>
-                <div class="profile-grid">
-                    <div class="profile-field full-width">
-                        <label>DNI</label>
-                        <span>${perfil.dni}</span>
+            <div class="modal-overlay" id="modalPerfil">
+                <div class="modal-card">
+                    <h2>PERFIL DEL ADMINISTRADOR</h2>
+                    <div class="profile-grid">
+                        <div class="profile-field full-width">
+                            <label>DNI</label>
+                            <span>${perfil.dni}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Nombre</label>
+                            <span>${perfil.nombre}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Apellidos</label>
+                            <span>${perfil.apellidos}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Fecha de Nacimiento</label>
+                            <span>${perfil.fechaNacimiento}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Edad</label>
+                            <span>${edad} a&ntilde;os</span>
+                        </div>
+                        <div class="profile-field full-width">
+                            <label>Correo Electr&oacute;nico</label>
+                            <span>${perfil.correo}</span>
+                        </div>
+                        <div class="profile-field full-width">
+                            <label>Tel&eacute;fono</label>
+                            <span>${perfil.telefono}</span>
+                        </div>
+                        <button class="profile-close-btn" onclick="cerrarPerfil()">CERRAR</button>
+                        <button class="profile-edit-btn" onclick="editarPerfil()">EDITAR PERFIL</button>
                     </div>
-                    <div class="profile-field">
-                        <label>Nombre</label>
-                        <span>${perfil.nombre}</span>
-                    </div>
-                    <div class="profile-field">
-                        <label>Apellidos</label>
-                        <span>${perfil.apellidos}</span>
-                    </div>
-                    <div class="profile-field">
-                        <label>Fecha de Nacimiento</label>
-                        <span>${perfil.fechaNacimiento}</span>
-                    </div>
-                    <div class="profile-field">
-                        <label>Edad</label>
-                        <span>${edad} a&ntilde;os</span>
-                    </div>
-                    <div class="profile-field full-width">
-                        <label>Correo Electr&oacute;nico</label>
-                        <span>${perfil.correo}</span>
-                    </div>
-                    <div class="profile-field full-width">
-                        <label>Tel&eacute;fono</label>
-                        <span>${perfil.telefono}</span>
-                    </div>
-                    <button class="profile-close-btn" onclick="cerrarPerfil()">CERRAR</button>
-                    <button class="profile-edit-btn" onclick="editarPerfil()">EDITAR PERFIL</button>
                 </div>
             </div>
-            </c:if>
         </div>
     </div>
 
@@ -977,17 +1008,21 @@
         }
 
         function verPerfil() {
-            var wc = document.getElementById('welcomeContainer');
-            if (wc) wc.style.display = 'none';
-            document.getElementById('profileCard').classList.add('visible');
+            document.getElementById('modalPerfil').classList.add('show');
         }
 
         function cerrarPerfil() {
-            document.getElementById('profileCard').classList.remove('visible');
+            document.getElementById('modalPerfil').classList.remove('show');
         }
 
         function editarPerfil() {
-            window.location.href = '${pageContext.request.contextPath}/menu';
+            document.getElementById('modalPerfil').classList.remove('show');
+            document.getElementById('modalEditPerfil').classList.add('show');
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('modalEditPerfil').classList.remove('show');
+            document.getElementById('modalPerfil').classList.add('show');
         }
 
         document.querySelectorAll('.sidebar-item').forEach(function(item) {

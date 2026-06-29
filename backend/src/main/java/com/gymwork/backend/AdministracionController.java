@@ -1,5 +1,6 @@
 package com.gymwork.backend;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +31,25 @@ public class AdministracionController {
     private DatosAdminGWRepository datosAdminRepository;
 
     @GetMapping("/administracion")
-    public String verAdministracion(Model model) {
+    public String verAdministracion(HttpSession session, Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+        DatosAdminGW perfil = (DatosAdminGW) session.getAttribute("perfil");
+        if (perfil == null) {
+            var datosOpt = datosAdminRepository.findByUsuarioUsername(username);
+            if (datosOpt.isPresent()) {
+                perfil = datosOpt.get();
+                session.setAttribute("perfil", perfil);
+            }
+        }
+        if (perfil != null) {
+            model.addAttribute("perfil", perfil);
+            int edad = Period.between(perfil.getFechaNacimiento(), LocalDate.now()).getYears();
+            model.addAttribute("edad", edad);
+        }
+
         long totalClientes = clientesRepository.count();
         model.addAttribute("totalClientes", totalClientes);
 

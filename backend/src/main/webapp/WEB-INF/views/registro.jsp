@@ -378,25 +378,34 @@
             object-fit: contain;
             flex-shrink: 0;
         }
-        .profile-card {
+        .modal-overlay {
             display: none;
-            background-color: #1e1e1e;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-card {
+            background: #1e1e1e;
             border: 1px solid #333;
             border-radius: 12px;
-            padding: 40px 50px;
+            padding: 35px 40px;
             width: 500px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-            position: relative;
-            z-index: 2;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
         }
-        .profile-card.visible {
-            display: block;
-        }
-        .profile-card h2 {
+        .modal-card h2 {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 28px;
             color: #fcd535;
-            margin: 0 0 30px 0;
+            margin: 0 0 25px 0;
             text-align: center;
             letter-spacing: 2px;
         }
@@ -462,28 +471,6 @@
         }
         .profile-edit-btn:hover {
             background: #e6c12e;
-        }
-        .edit-card {
-            display: none;
-            background-color: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 40px 50px;
-            width: 500px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-            position: relative;
-            z-index: 2;
-        }
-        .edit-card.visible {
-            display: block;
-        }
-        .edit-card h2 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px;
-            color: #fcd535;
-            margin: 0 0 30px 0;
-            text-align: center;
-            letter-spacing: 2px;
         }
         .edit-grid {
             display: grid;
@@ -636,10 +623,15 @@
     <div class="dashboard-layout">
         <nav class="sidebar">
             <div class="sidebar-header">MÓDULOS</div>
-            <div class="sidebar-item" data-modulo="suscripciones">
-                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Suscripciones"> Suscripciones
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/menu'">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Menú Principal"> Menú Principal
             </div>
             <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/menu?modulo=suscripciones'">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Suscripciones"> Suscripciones
+            </div>
+            <div class="sidebar-item active"
                 onclick="window.location.href='${pageContext.request.contextPath}/registro'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Registro.png" alt="Registro"> Registro
             </div>
@@ -830,81 +822,81 @@
             <div class="error-toast show" id="errorToast">${error}</div>
             </c:if>
 
-            <c:if test="${perfil != null}">
-            <div class="profile-card" id="profileCard">
-                <h2>PERFIL DEL ADMINISTRADOR</h2>
-                <div class="profile-grid">
-                    <div class="profile-field full-width">
-                        <label>DNI</label>
-                        <span id="pDni">${perfil.dni}</span>
+            <div class="modal-overlay" id="modalPerfil">
+                <div class="modal-card">
+                    <h2>PERFIL DEL ADMINISTRADOR</h2>
+                    <div class="profile-grid">
+                        <div class="profile-field full-width">
+                            <label>DNI</label>
+                            <span id="pDni">${perfil.dni}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Nombre</label>
+                            <span id="pNombre">${perfil.nombre}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Apellidos</label>
+                            <span id="pApellidos">${perfil.apellidos}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Fecha de Nacimiento</label>
+                            <span id="pFechaNac">${perfil.fechaNacimiento}</span>
+                        </div>
+                        <div class="profile-field">
+                            <label>Edad</label>
+                            <span id="pEdad">${edad} años</span>
+                        </div>
+                        <div class="profile-field full-width">
+                            <label>Correo Electrónico</label>
+                            <span id="pCorreo">${perfil.correo}</span>
+                        </div>
+                        <div class="profile-field full-width">
+                            <label>Teléfono</label>
+                            <span id="pTelefono">${perfil.telefono}</span>
+                        </div>
+                        <button class="profile-close-btn" onclick="cerrarPerfil()">CERRAR</button>
+                        <button class="profile-edit-btn" onclick="editarPerfil()">EDITAR PERFIL</button>
                     </div>
-                    <div class="profile-field">
-                        <label>Nombre</label>
-                        <span id="pNombre">${perfil.nombre}</span>
-                    </div>
-                    <div class="profile-field">
-                        <label>Apellidos</label>
-                        <span id="pApellidos">${perfil.apellidos}</span>
-                    </div>
-                    <div class="profile-field">
-                        <label>Fecha de Nacimiento</label>
-                        <span id="pFechaNac">${perfil.fechaNacimiento}</span>
-                    </div>
-                    <div class="profile-field">
-                        <label>Edad</label>
-                        <span id="pEdad">${edad} años</span>
-                    </div>
-                    <div class="profile-field full-width">
-                        <label>Correo Electrónico</label>
-                        <span id="pCorreo">${perfil.correo}</span>
-                    </div>
-                    <div class="profile-field full-width">
-                        <label>Teléfono</label>
-                        <span id="pTelefono">${perfil.telefono}</span>
-                    </div>
-                    <button class="profile-close-btn" onclick="cerrarPerfil()">CERRAR</button>
-                    <button class="profile-edit-btn" onclick="editarPerfil()">EDITAR PERFIL</button>
                 </div>
             </div>
-            </c:if>
 
-            <c:if test="${perfil != null}">
-            <div class="edit-card" id="editCard">
-                <h2>EDITAR PERFIL</h2>
-                <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post">
-                    <div class="edit-grid">
-                        <div class="edit-field full-width">
-                            <label>DNI</label>
-                            <input type="text" name="dni" value="${perfil.dni}" readonly>
+            <div class="modal-overlay" id="modalEditPerfil">
+                <div class="modal-card">
+                    <h2>EDITAR PERFIL</h2>
+                    <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post" novalidate>
+                        <div class="edit-grid">
+                            <div class="edit-field full-width">
+                                <label>DNI</label>
+                                <input type="text" name="dni" value="${perfil.dni}" readonly>
+                            </div>
+                            <div class="edit-field">
+                                <label>Nombre</label>
+                                <input type="text" name="nombre" value="${perfil.nombre}">
+                            </div>
+                            <div class="edit-field">
+                                <label>Apellidos</label>
+                                <input type="text" name="apellidos" value="${perfil.apellidos}">
+                            </div>
+                            <div class="edit-field">
+                                <label>Fecha de Nacimiento</label>
+                                <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}">
+                            </div>
+                            <div class="edit-field full-width">
+                                <label>Correo Electrónico</label>
+                                <input type="email" name="correo" value="${perfil.correo}">
+                            </div>
+                            <div class="edit-field full-width">
+                                <label>Teléfono</label>
+                                <input type="text" name="telefono" value="${perfil.telefono}">
+                            </div>
+                            <div class="edit-buttons">
+                                <button type="button" class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
+                                <button type="submit" class="btn-save">GUARDAR</button>
+                            </div>
                         </div>
-                        <div class="edit-field">
-                            <label>Nombre</label>
-                            <input type="text" name="nombre" value="${perfil.nombre}" required>
-                        </div>
-                        <div class="edit-field">
-                            <label>Apellidos</label>
-                            <input type="text" name="apellidos" value="${perfil.apellidos}" required>
-                        </div>
-                        <div class="edit-field">
-                            <label>Fecha de Nacimiento</label>
-                            <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}" required>
-                        </div>
-                        <div class="edit-field full-width">
-                            <label>Correo Electrónico</label>
-                            <input type="email" name="correo" value="${perfil.correo}" required>
-                        </div>
-                        <div class="edit-field full-width">
-                            <label>Teléfono</label>
-                            <input type="text" name="telefono" value="${perfil.telefono}" required>
-                        </div>
-                        <div class="edit-buttons">
-                            <button type="button" class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
-                            <button type="submit" class="btn-save">GUARDAR</button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-            </c:if>
 
             <c:if test="${not empty exito}">
             <div class="success-toast show" id="successToast">${exito}</div>
@@ -933,25 +925,21 @@
         }
 
         function verPerfil() {
-            var wc = document.getElementById('welcomeContainer');
-            if (wc) wc.style.display = 'none';
-            document.getElementById('profileCard').classList.add('visible');
+            document.getElementById('modalPerfil').classList.add('show');
         }
 
         function cerrarPerfil() {
-            document.getElementById('profileCard').classList.remove('visible');
-            var wc = document.getElementById('welcomeContainer');
-            if (wc) wc.style.display = '';
+            document.getElementById('modalPerfil').classList.remove('show');
         }
 
         function editarPerfil() {
-            document.getElementById('profileCard').classList.remove('visible');
-            document.getElementById('editCard').classList.add('visible');
+            document.getElementById('modalPerfil').classList.remove('show');
+            document.getElementById('modalEditPerfil').classList.add('show');
         }
 
         function cancelarEdicion() {
-            document.getElementById('editCard').classList.remove('visible');
-            document.getElementById('profileCard').classList.add('visible');
+            document.getElementById('modalEditPerfil').classList.remove('show');
+            document.getElementById('modalPerfil').classList.add('show');
         }
 
         const toast = document.getElementById('successToast');

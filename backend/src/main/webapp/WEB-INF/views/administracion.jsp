@@ -36,6 +36,68 @@
             color: #fcd535;
             letter-spacing: 2px;
         }
+        .profile-container {
+            position: relative;
+            display: inline-block;
+        }
+        .profile-btn {
+            background: #000;
+            border: 2px solid #555;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+            overflow: hidden;
+        }
+        .profile-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.15);
+        }
+        .profile-btn:hover {
+            border-color: #fcd535;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 55px;
+            background-color: #1a1a1a;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.6);
+            border: 1px solid #333;
+            border-radius: 4px;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .dropdown-item {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .dropdown-item:hover {
+            background-color: #fcd535;
+            color: black;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
         .dashboard-layout {
             display: flex;
             height: calc(100vh - 80px);
@@ -384,11 +446,187 @@
         .btn-renovar:hover {
             background: #e6c12e;
         }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-card {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 35px 40px;
+            width: 500px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+        }
+        .modal-card h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: #fcd535;
+            margin: 0 0 25px 0;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .profile-field {
+            display: flex;
+            flex-direction: column;
+        }
+        .profile-field.full-width {
+            grid-column: 1 / -1;
+        }
+        .profile-field label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .profile-field span {
+            font-size: 16px;
+            color: #fff;
+            font-weight: 500;
+        }
+        .profile-close-btn {
+            margin-top: 30px;
+            grid-column: 1 / -1;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid #555;
+            color: #ccc;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .profile-close-btn:hover {
+            border-color: #fcd535;
+            color: #fcd535;
+        }
+        .profile-edit-btn {
+            margin-top: 10px;
+            grid-column: 1 / -1;
+            padding: 12px;
+            background: #fcd535;
+            border: none;
+            color: #1a1a1a;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .profile-edit-btn:hover {
+            background: #e6c12e;
+        }
+        .edit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .edit-field {
+            display: flex;
+            flex-direction: column;
+        }
+        .edit-field.full-width {
+            grid-column: 1 / -1;
+        }
+        .edit-field label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .edit-field input {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .edit-field input:focus {
+            border-color: #fcd535;
+        }
+        .edit-field input[readonly] {
+            background: #1a1a1a;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .edit-buttons {
+            display: flex;
+            gap: 12px;
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+        .edit-buttons button {
+            flex: 1;
+            padding: 12px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .btn-save {
+            background: #fcd535;
+            border: none;
+            color: #1a1a1a;
+        }
+        .btn-save:hover {
+            background: #e6c12e;
+        }
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid #555;
+            color: #ccc;
+        }
+        .btn-cancel:hover {
+            border-color: #fcd535;
+            color: #fcd535;
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <h1>GYMWORK</h1>
+        <div class="profile-container">
+            <button class="profile-btn" id="btnPerfil">
+                <img src="${pageContext.request.contextPath}/User_Profile.jpg" alt="Perfil">
+            </button>
+            <div class="dropdown-menu" id="menuDesplegable">
+                <button class="dropdown-item" onclick="verPerfil()">VER PERFIL</button>
+                <button class="dropdown-item" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+            </div>
+        </div>
     </nav>
 
     <div class="dashboard-layout">
@@ -397,11 +635,17 @@
             <a class="sidebar-item" href="${pageContext.request.contextPath}/menu">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Menú Principal"> Menú Principal
             </a>
+            <a class="sidebar-item" href="${pageContext.request.contextPath}/menu?modulo=suscripciones">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Suscripciones"> Suscripciones
+            </a>
             <a class="sidebar-item" href="${pageContext.request.contextPath}/registro">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Registro.png" alt="Registro"> Registro
             </a>
             <a class="sidebar-item" href="${pageContext.request.contextPath}/sedes">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Sedes.png" alt="Sedes"> Sedes
+            </a>
+            <a class="sidebar-item" href="${pageContext.request.contextPath}/maquinas">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Maquinas.png" alt="Estado de Máquinas"> Estado de Máquinas
             </a>
             <a class="sidebar-item" href="${pageContext.request.contextPath}/soporte">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Soporte.png" alt="Soporte"> Soporte
@@ -558,7 +802,119 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modalPerfil">
+        <div class="modal-card">
+            <h2>PERFIL DEL ADMINISTRADOR</h2>
+            <div class="profile-grid">
+                <div class="profile-field full-width">
+                    <label>DNI</label>
+                    <span>${perfil.dni}</span>
+                </div>
+                <div class="profile-field">
+                    <label>Nombre</label>
+                    <span>${perfil.nombre}</span>
+                </div>
+                <div class="profile-field">
+                    <label>Apellidos</label>
+                    <span>${perfil.apellidos}</span>
+                </div>
+                <div class="profile-field">
+                    <label>Fecha de Nacimiento</label>
+                    <span>${perfil.fechaNacimiento}</span>
+                </div>
+                <div class="profile-field">
+                    <label>Edad</label>
+                    <span>${edad} años</span>
+                </div>
+                <div class="profile-field full-width">
+                    <label>Correo Electrónico</label>
+                    <span>${perfil.correo}</span>
+                </div>
+                <div class="profile-field full-width">
+                    <label>Teléfono</label>
+                    <span>${perfil.telefono}</span>
+                </div>
+                <button class="profile-close-btn" onclick="cerrarPerfil()">CERRAR</button>
+                <button class="profile-edit-btn" onclick="editarPerfil()">EDITAR PERFIL</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalEditPerfil">
+        <div class="modal-card">
+            <h2>EDITAR PERFIL</h2>
+            <form action="${pageContext.request.contextPath}/perfil/actualizar" method="post" novalidate>
+                <div class="edit-grid">
+                    <div class="edit-field full-width">
+                        <label>DNI</label>
+                        <input type="text" name="dni" value="${perfil.dni}" readonly>
+                    </div>
+                    <div class="edit-field">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" value="${perfil.nombre}">
+                    </div>
+                    <div class="edit-field">
+                        <label>Apellidos</label>
+                        <input type="text" name="apellidos" value="${perfil.apellidos}">
+                    </div>
+                    <div class="edit-field">
+                        <label>Fecha de Nacimiento</label>
+                        <input type="date" name="fechaNacimiento" value="${perfil.fechaNacimiento}">
+                    </div>
+                    <div class="edit-field full-width">
+                        <label>Correo Electrónico</label>
+                        <input type="email" name="correo" value="${perfil.correo}">
+                    </div>
+                    <div class="edit-field full-width">
+                        <label>Teléfono</label>
+                        <input type="text" name="telefono" value="${perfil.telefono}">
+                    </div>
+                    <div class="edit-buttons">
+                        <button type="button" class="btn-cancel" onclick="cancelarEdicion()">CANCELAR</button>
+                        <button type="submit" class="btn-save">GUARDAR</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        const btnPerfil = document.getElementById('btnPerfil');
+        const menuDesplegable = document.getElementById('menuDesplegable');
+
+        btnPerfil.addEventListener('click', function(evento) {
+            evento.stopPropagation();
+            menuDesplegable.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function() {
+            if (menuDesplegable.classList.contains('show')) {
+                menuDesplegable.classList.remove('show');
+            }
+        });
+
+        function cerrarSesion() {
+            window.location.href = '${pageContext.request.contextPath}/logout';
+        }
+
+        function verPerfil() {
+            document.getElementById('modalPerfil').classList.add('show');
+        }
+
+        function cerrarPerfil() {
+            document.getElementById('modalPerfil').classList.remove('show');
+        }
+
+        function editarPerfil() {
+            document.getElementById('modalPerfil').classList.remove('show');
+            document.getElementById('modalEditPerfil').classList.add('show');
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('modalEditPerfil').classList.remove('show');
+            document.getElementById('modalPerfil').classList.add('show');
+        }
+
         function actualizarReloj() {
             var ahora = new Date();
             var h = String(ahora.getHours()).padStart(2, '0');
