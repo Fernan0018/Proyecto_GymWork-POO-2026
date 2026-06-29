@@ -696,6 +696,23 @@
             background: #2a2a2a;
             color: #fff;
         }
+        .modal-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        .modal-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .modal-section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            color: #fcd535;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -759,6 +776,7 @@
                 <div class="module-card">
                     <div class="module-actions">
                         <input type="text" id="buscarMaquina" placeholder="Buscar por nombre/modelo" oninput="filtrarMaquinas()">
+                        <a href="${pageContext.request.contextPath}/maquinas/reporte/pdf" class="btn-success" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">DESCARGAR PDF</a>
                         <button class="btn-primary" onclick="abrirModalAgregar()" style="margin-left:auto;">+ AGREGAR</button>
                     </div>
 
@@ -804,7 +822,6 @@
                                             </c:choose>
                                         </td>
                                         <td>
-                                            <button class="action-btn-sm" onclick="abrirModalVisualizar(this)">&#128065; VER</button>
                                             <button class="action-btn-sm" onclick="abrirModalEditar(this)">&#9998; EDIT</button>
                                             <button class="btn-danger-sm" onclick="abrirModalEliminar(this)">&#128465; ELIM</button>
                                         </td>
@@ -818,38 +835,51 @@
 
             <div class="modal-overlay" id="modalMaquina">
                 <div class="modal-card">
-                    <h2 id="modalMaquinaTitulo">AGREGAR M&Aacute;QUINA</h2>
+                    <h2 id="modalMaquinaTitulo">REGISTRAR EQUIPO</h2>
                     <form id="formMaquina" action="${pageContext.request.contextPath}/maquinas/guardar" method="post">
                         <input type="hidden" name="idMaquina" id="mId">
-                        <div class="modal-field">
-                            <label>Nombre / Modelo</label>
-                            <input type="text" name="nombreModelo" id="mNombre" required>
+
+                        <div class="modal-section">
+                            <div class="modal-section-title">INFORMACI&Oacute;N T&Eacute;CNICA</div>
+                            <div class="modal-field">
+                                <label>ID del Equipo</label>
+                                <input type="text" id="mIdDisplay" readonly placeholder="Generado autom&aacute;ticamente">
+                            </div>
+                            <div class="modal-field">
+                                <label>Nombre / Modelo</label>
+                                <input type="text" name="nombreModelo" id="mNombre" required>
+                            </div>
+                            <div class="modal-field">
+                                <label>Sede</label>
+                                <select name="idSede" id="mSede">
+                                    <option value="">Seleccionar sede...</option>
+                                    <c:forEach var="s" items="${sedes}">
+                                        <option value="${s.idSede}">${s.nombreSede}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
                         </div>
-                        <div class="modal-field">
-                            <label>Sede</label>
-                            <select name="idSede" id="mSede">
-                                <option value="">Seleccionar sede...</option>
-                                <c:forEach var="s" items="${sedes}">
-                                    <option value="${s.idSede}">${s.nombreSede}</option>
-                                </c:forEach>
-                            </select>
+
+                        <div class="modal-section">
+                            <div class="modal-section-title">ACCIONES</div>
+                            <div class="modal-field">
+                                <label>Fecha de Mantenimiento</label>
+                                <input type="date" name="ultimoMantenimiento" id="mMantenimiento">
+                            </div>
+                            <div class="modal-field">
+                                <label>Estado del Equipo</label>
+                                <select name="estadoMaquina" id="mEstado" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Operativa">Operativa</option>
+                                    <option value="Mantenimiento">Mantenimiento</option>
+                                    <option value="Inactiva">Inactiva</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="modal-field">
-                            <label>Estado</label>
-                            <select name="estadoMaquina" id="mEstado" required>
-                                <option value="">Seleccionar...</option>
-                                <option value="Operativa">Operativa</option>
-                                <option value="Mantenimiento">Mantenimiento</option>
-                                <option value="Inactiva">Inactiva</option>
-                            </select>
-                        </div>
-                        <div class="modal-field">
-                            <label>&Uacute;ltimo Mantenimiento</label>
-                            <input type="date" name="ultimoMantenimiento" id="mMantenimiento">
-                        </div>
+
                         <div class="modal-buttons">
-                            <button type="button" class="btn-cancel" onclick="cerrarModalMaquina()">CANCELAR</button>
-                            <button type="submit" class="btn-save" id="btnGuardarMaquina">GUARDAR</button>
+                            <button type="button" class="btn-cancel" id="btnCerrarMaquina" onclick="cerrarModalMaquina()">CERRAR</button>
+                            <button type="submit" class="btn-save" id="btnGuardarMaquina">CREAR</button>
                         </div>
                     </form>
                 </div>
@@ -989,50 +1019,35 @@
         }
 
         function abrirModalAgregar() {
-            document.getElementById('modalMaquinaTitulo').textContent = 'AGREGAR M&Aacute;QUINA';
+            document.getElementById('modalMaquinaTitulo').textContent = 'REGISTRAR EQUIPO';
             document.getElementById('formMaquina').action = '${pageContext.request.contextPath}/maquinas/guardar';
             document.getElementById('mId').value = '';
+            document.getElementById('mIdDisplay').value = '';
             document.getElementById('mNombre').value = '';
             document.getElementById('mSede').value = '';
             document.getElementById('mEstado').value = '';
             document.getElementById('mMantenimiento').value = '';
+            document.getElementById('btnGuardarMaquina').textContent = 'CREAR';
+            document.getElementById('btnCerrarMaquina').textContent = 'CERRAR';
+            document.getElementById('mIdDisplay').placeholder = 'Generado autom\u00E1ticamente';
             document.getElementById('modalMaquina').classList.add('show');
-        }
-
-        function poblarModalMaquina(tr, soloLectura) {
-            var d = tr.dataset;
-            document.getElementById('mId').value = d.id;
-            document.getElementById('mNombre').value = d.nombre;
-            document.getElementById('mSede').value = d.idSede || '';
-            document.getElementById('mEstado').value = d.estado;
-            document.getElementById('mMantenimiento').value = d.ultimoMantenimiento || '';
-
-            var inputs = document.querySelectorAll('#formMaquina input, #formMaquina select');
-            for (var i = 0; i < inputs.length; i++) {
-                if (inputs[i].name === 'idMaquina') continue;
-                if (soloLectura) {
-                    inputs[i].setAttribute('readonly', '');
-                    inputs[i].setAttribute('disabled', '');
-                } else {
-                    inputs[i].removeAttribute('readonly');
-                    inputs[i].removeAttribute('disabled');
-                }
-            }
-
-            document.getElementById('btnGuardarMaquina').style.display = soloLectura ? 'none' : 'block';
-            document.getElementById('modalMaquinaTitulo').textContent = soloLectura ? 'VISUALIZAR M&Aacute;QUINA' : 'EDITAR M&Aacute;QUINA';
-            document.getElementById('formMaquina').action = soloLectura ? '#' : '${pageContext.request.contextPath}/maquinas/actualizar';
-            document.getElementById('modalMaquina').classList.add('show');
-        }
-
-        function abrirModalVisualizar(btn) {
-            var tr = btn.closest('tr');
-            poblarModalMaquina(tr, true);
         }
 
         function abrirModalEditar(btn) {
             var tr = btn.closest('tr');
-            poblarModalMaquina(tr, false);
+            var d = tr.dataset;
+            document.getElementById('modalMaquinaTitulo').textContent = 'ACTUALIZAR EQUIPO';
+            document.getElementById('formMaquina').action = '${pageContext.request.contextPath}/maquinas/actualizar';
+            document.getElementById('mId').value = d.id;
+            document.getElementById('mIdDisplay').value = d.id;
+            document.getElementById('mIdDisplay').placeholder = '';
+            document.getElementById('mNombre').value = d.nombre;
+            document.getElementById('mSede').value = d.idSede || '';
+            document.getElementById('mEstado').value = d.estado;
+            document.getElementById('mMantenimiento').value = d.ultimoMantenimiento || '';
+            document.getElementById('btnGuardarMaquina').textContent = 'ACTUALIZAR';
+            document.getElementById('btnCerrarMaquina').textContent = 'CANCELAR';
+            document.getElementById('modalMaquina').classList.add('show');
         }
 
         function cerrarModalMaquina() {
