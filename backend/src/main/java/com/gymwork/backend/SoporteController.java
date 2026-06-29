@@ -30,6 +30,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -50,14 +51,16 @@ public class SoporteController {
     private final DatosAdminGWRepository datosAdminRepository;
     private final TiemposTicketGWRepository tiemposTicketRepository;
     private final RegistroTiempoPromGWRepository registroPromRepository;
+    private final HistorialSoporteGWRepository historialSoporteRepository;
 
-    public SoporteController(SoporteGWRepository soporteRepository, SedesGWRepository sedesRepository, MaquinasGWRepository maquinasRepository, DatosAdminGWRepository datosAdminRepository, TiemposTicketGWRepository tiemposTicketRepository, RegistroTiempoPromGWRepository registroPromRepository) {
+    public SoporteController(SoporteGWRepository soporteRepository, SedesGWRepository sedesRepository, MaquinasGWRepository maquinasRepository, DatosAdminGWRepository datosAdminRepository, TiemposTicketGWRepository tiemposTicketRepository, RegistroTiempoPromGWRepository registroPromRepository, HistorialSoporteGWRepository historialSoporteRepository) {
         this.soporteRepository = soporteRepository;
         this.sedesRepository = sedesRepository;
         this.maquinasRepository = maquinasRepository;
         this.datosAdminRepository = datosAdminRepository;
         this.tiemposTicketRepository = tiemposTicketRepository;
         this.registroPromRepository = registroPromRepository;
+        this.historialSoporteRepository = historialSoporteRepository;
     }
 
     @GetMapping("/soporte")
@@ -669,11 +672,53 @@ public class SoporteController {
         }
 
         if (!idsAProcesar.isEmpty()) {
+            for (Integer id : idsAProcesar) {
+                Optional<SoporteGW> tOpt = soporteRepository.findById(id);
+                Optional<TiemposTicketGW> ttOpt = tiemposTicketRepository.findById(id);
+                if (tOpt.isPresent()) {
+                    SoporteGW ticket = tOpt.get();
+                    HistorialSoporteGW hist = new HistorialSoporteGW();
+                    hist.setIdTicket(ticket.getIdTicket());
+                    hist.setAsuntoTicket(ticket.getAsuntoTicket());
+                    hist.setRemitente(ticket.getRemitente());
+                    hist.setCategoria(ticket.getCategoria());
+                    hist.setIdMaquinas(ticket.getIdMaquinas());
+                    hist.setIdSede(ticket.getIdSede());
+                    hist.setPrioridad(ticket.getPrioridad());
+                    hist.setEstadoTicket(ticket.getEstadoTicket());
+                    if (ttOpt.isPresent()) {
+                        TiemposTicketGW tt = ttOpt.get();
+                        hist.setTiempoInicio(tt.getTiempoInicio());
+                        hist.setTiempoFin(tt.getTiempoFin());
+                        hist.setDiaResolucion(tt.getDiaResolucion());
+                        hist.setMinutosResolucion(tt.getMinutosResolucion());
+                    }
+                    hist.setFechaArchivado(LocalDateTime.now());
+                    historialSoporteRepository.save(hist);
+                }
+            }
             tiemposTicketRepository.deleteAllById(idsAProcesar);
             soporteRepository.deleteAllById(idsAProcesar);
         }
 
         if (!idsSinRegistro.isEmpty()) {
+            for (Integer id : idsSinRegistro) {
+                Optional<SoporteGW> tOpt = soporteRepository.findById(id);
+                if (tOpt.isPresent()) {
+                    SoporteGW ticket = tOpt.get();
+                    HistorialSoporteGW hist = new HistorialSoporteGW();
+                    hist.setIdTicket(ticket.getIdTicket());
+                    hist.setAsuntoTicket(ticket.getAsuntoTicket());
+                    hist.setRemitente(ticket.getRemitente());
+                    hist.setCategoria(ticket.getCategoria());
+                    hist.setIdMaquinas(ticket.getIdMaquinas());
+                    hist.setIdSede(ticket.getIdSede());
+                    hist.setPrioridad(ticket.getPrioridad());
+                    hist.setEstadoTicket(ticket.getEstadoTicket());
+                    hist.setFechaArchivado(LocalDateTime.now());
+                    historialSoporteRepository.save(hist);
+                }
+            }
             soporteRepository.deleteAllById(idsSinRegistro);
         }
     }
