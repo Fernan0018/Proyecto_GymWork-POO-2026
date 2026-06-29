@@ -20,7 +20,10 @@ import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -29,9 +32,11 @@ public class RegistroController {
 
     private static final Logger LOG = Logger.getLogger(RegistroController.class.getName());
     private final ClientesGWRepository clientesRepository;
+    private final PagosGWRepository pagosRepository;
 
-    public RegistroController(ClientesGWRepository clientesRepository) {
+    public RegistroController(ClientesGWRepository clientesRepository, PagosGWRepository pagosRepository) {
         this.clientesRepository = clientesRepository;
+        this.pagosRepository = pagosRepository;
     }
 
     @GetMapping("/registro")
@@ -51,6 +56,30 @@ public class RegistroController {
                 )
         );
     }
+
+        List<?> clientesList = (List<?>) model.getAttribute("clientes");
+        List<PagosGW> todosLosPagos = pagosRepository.findAll();
+        Map<String, String> estadosMap = new HashMap<>();
+        LocalDate hoy = LocalDate.now();
+
+        for (Object obj : clientesList) {
+            ClientesGW cliente = (ClientesGW) obj;
+            boolean activo = false;
+            for (PagosGW pago : todosLosPagos) {
+                if (pago.getCodigoCliente() != null
+                        && pago.getCodigoCliente().equals(cliente.getCodigo())
+                        && pago.getFechaPago() != null) {
+                    long dias = ChronoUnit.DAYS.between(pago.getFechaPago().toLocalDate(), hoy);
+                    if (dias <= 30) {
+                        activo = true;
+                        break;
+                    }
+                }
+            }
+            estadosMap.put(cliente.getCodigo(), activo ? "Activo" : "Vencido");
+        }
+
+        model.addAttribute("estadosMap", estadosMap);
 
         
         return "registro";
@@ -74,6 +103,7 @@ public class RegistroController {
             existente.setDepartamento(cliente.getDepartamento());
             existente.setCiudad(cliente.getCiudad());
             existente.setCalle(cliente.getCalle());
+            existente.setEdad(cliente.getEdad());
 
             // NO modificar idSede
 
@@ -85,6 +115,24 @@ public class RegistroController {
 
     @PostMapping("/registro/eliminar")
     public String eliminarCliente(String codigo, RedirectAttributes redirect) {
+
+            List<PagosGW> pagos = pagosRepository.findAll();
+            boolean activo = false;
+            for (PagosGW pago : pagos) {
+                if (pago.getCodigoCliente() != null
+                        && pago.getCodigoCliente().equals(codigo)
+                        && pago.getFechaPago() != null) {
+                    long dias = ChronoUnit.DAYS.between(pago.getFechaPago().toLocalDate(), LocalDate.now());
+                    if (dias <= 30) {
+                        activo = true;
+                        break;
+                    }
+                }
+            }
+            if (activo) {
+                redirect.addFlashAttribute("error", "No se puede eliminar un cliente con membres\u00EDa activa");
+                return "redirect:/registro";
+            }
 
             try {
                 clientesRepository.deleteById(codigo);

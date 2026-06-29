@@ -655,7 +655,8 @@
                 onclick="window.location.href='${pageContext.request.contextPath}/soporte'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Soporte.png" alt="Soporte"> Soporte
             </div>
-            <div class="sidebar-item" data-modulo="admin">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/administracion'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Administracion.png" alt="Módulo de Administración"> Módulo de Administración
             </div>
         </nav>
@@ -671,6 +672,12 @@
         <div class="module-actions">
             <input type="text" id="buscarCliente" placeholder="Buscar por nombre o código" oninput="filtrarClientes()">
             <a href="${pageContext.request.contextPath}/registro/reporte/pdf" class="action-btn" style="text-decoration:none;background:#28a745;color:white;display:inline-flex;align-items:center;gap:6px;">DESCARGAR PDF</a>
+            <select id="filtroPlan" onchange="filtrarPorPlan()" style="background:#2a2a2a;color:#fff;border:1px solid #444;border-radius:6px;padding:10px 12px;font-family:'Montserrat',sans-serif;font-size:13px;outline:none;cursor:pointer;">
+                <option value="">Todos los Planes</option>
+                <option value="001">Paquete Fit</option>
+                <option value="010">Paquete B&aacute;sico</option>
+                <option value="100">Plan Premium</option>
+            </select>
         </div>
         <h3>Total clientes: <span id="totalClientes">${clientes.size()}</span></h3>
 
@@ -701,7 +708,8 @@
                         data-ciudad="${c.ciudad}"
                         data-calle="${c.calle}"
                         data-fecha-nacimiento="${c.fechaNacimiento}"
-                        data-edad="${c.edad}">
+                        data-edad="${c.edad}"
+                        data-estado="${estadosMap[c.codigo]}">
                         <td>${c.codigo}</td>
                         <td>${c.nombre}</td>
                         <td>${c.apellidoPaterno} ${c.apellidoMaterno}</td>
@@ -717,7 +725,9 @@
                         <td style="white-space:nowrap;">
                             <button class="action-btn-sm" onclick="abrirModalVisualizar(this)">&#128065; VER</button>
                             <button class="action-btn-sm" onclick="abrirModalEditar(this)">&#9998; EDIT</button>
+                            <c:if test="${estadosMap[c.codigo] == 'Vencido'}">
                             <button class="btn-danger-sm" onclick="abrirModalEliminar(this)">&#128465; ELIM</button>
+                            </c:if>
                         </td>
                     </tr>
                 </c:forEach>
@@ -738,19 +748,19 @@
                     </div>
                     <div class="modal-field">
                         <label>Nombre</label>
-                        <input type="text" name="nombre" id="sNombre">
+                        <input type="text" name="nombre" id="sNombre" required>
                     </div>
                     <div class="modal-field">
                         <label>Apellido Paterno</label>
-                        <input type="text" name="apellidoPaterno" id="sApellidoPaterno">
+                        <input type="text" name="apellidoPaterno" id="sApellidoPaterno" required>
                     </div>
                     <div class="modal-field">
                         <label>Apellido Materno</label>
-                        <input type="text" name="apellidoMaterno" id="sApellidoMaterno">
+                        <input type="text" name="apellidoMaterno" id="sApellidoMaterno" required>
                     </div>
                     <div class="modal-field">
                         <label>Edad</label>
-                        <input type="number" name="edad" id="sEdad" readonly>
+                        <input type="number" name="edad" id="sEdad" required>
                     </div>
                     <div class="modal-field">
                         <label>Fecha Nacimiento</label>
@@ -765,31 +775,31 @@
                     </div>
                     <div class="modal-field">
                         <label>Correo</label>
-                        <input type="email" name="correo" id="sCorreo">
+                        <input type="email" name="correo" id="sCorreo" required>
                     </div>
                     <div class="modal-field full-width">
                         <label>Teléfono</label>
-                        <input type="text" name="telefono" id="sTelefono">
+                        <input type="text" name="telefono" id="sTelefono" required>
                     </div>
                     <div class="modal-field full-width">
                         <label>Tipo de Plan</label>
                             <select name="tipoPlan" id="sTipoPlan">
-                                    <option value="001">Paquete Fit</option>
-                                    <option value="010">Paquete B&aacute;sico</option>
-                                    <option value="100">Plan Premium</option>
-                                </select>
+                                <option value="001">Paquete Fit</option>
+                                <option value="010">Paquete B&aacute;sico</option>
+                                <option value="100">Plan Premium</option>
+                            </select>
                     </div>
                     <div class="modal-field">
                         <label>Departamento</label>
-                        <input type="text" name="departamento" id="sDepartamento">
+                        <input type="text" name="departamento" id="sDepartamento" required>
                     </div>
                     <div class="modal-field">
                         <label>Ciudad</label>
-                        <input type="text" name="ciudad" id="sCiudad">
+                        <input type="text" name="ciudad" id="sCiudad" required>
                     </div>
                     <div class="modal-field full-width">
                         <label>Calle</label>
-                        <input type="text" name="calle" id="sCalle">
+                        <input type="text" name="calle" id="sCalle" required>
                     </div>
                 </div>
                 <div class="modal-buttons">
@@ -966,14 +976,27 @@
         }
 
         function filtrarClientes() {
+            aplicarFiltros();
+        }
+
+        function filtrarPorPlan() {
+            aplicarFiltros();
+        }
+
+        function aplicarFiltros() {
             var input = document.getElementById('buscarCliente').value.toLowerCase();
+            var plan = document.getElementById('filtroPlan').value;
             var tbody = document.getElementById('tablaRegistroBody');
             var filas = tbody.getElementsByTagName('tr');
             var visibles = 0;
 
             for (var i = 0; i < filas.length; i++) {
                 var texto = filas[i].textContent.toLowerCase();
-                if (texto.indexOf(input) > -1) {
+                var planFila = filas[i].dataset.tipoPlan || '';
+                var coincideTexto = texto.indexOf(input) > -1;
+                var coincidePlan = plan === '' || planFila === plan;
+
+                if (coincideTexto && coincidePlan) {
                     filas[i].style.display = '';
                     visibles++;
                 } else {
