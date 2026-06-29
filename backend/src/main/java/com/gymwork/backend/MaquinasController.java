@@ -65,7 +65,7 @@ public class MaquinasController {
 
         long total = maquinas.size();
         long operativas = maquinasRepository.countByEstadoMaquina("Operativa");
-        long mantenimiento = maquinasRepository.countByEstadoMaquina("Mantenimiento");
+        long mantenimiento = maquinasRepository.countByEstadoMaquina("Revisi\u00F3n");
         long inactivas = maquinasRepository.countByEstadoMaquina("Inactiva");
 
         model.addAttribute("totalMaquinas", total);
@@ -233,13 +233,13 @@ public class MaquinasController {
 
             long total = maquinas.size();
             long operativas = maquinasRepository.countByEstadoMaquina("Operativa");
-            long mantenimiento = maquinasRepository.countByEstadoMaquina("Mantenimiento");
+            long mantenimiento = maquinasRepository.countByEstadoMaquina("Revisi\u00F3n");
             long inactivas = maquinasRepository.countByEstadoMaquina("Inactiva");
 
             cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 11);
             cs.beginText();
             cs.newLineAtOffset(50, y);
-            cs.showText("Total: " + total + " | Operativas: " + operativas + " | Mantenimiento: " + mantenimiento + " | Inactivas: " + inactivas);
+            cs.showText("Total: " + total + " | Operativas: " + operativas + " | Revisi\u00F3n: " + mantenimiento + " | Inactivas: " + inactivas);
             cs.endText();
             y -= 30;
 
@@ -324,7 +324,7 @@ public class MaquinasController {
     }
 
     private boolean isValidEstado(String estado) {
-        return estado != null && (estado.equals("Operativa") || estado.equals("Mantenimiento") || estado.equals("Inactiva"));
+        return estado != null && (estado.equals("Operativa") || estado.equals("Revisi\u00F3n") || estado.equals("Inactiva"));
     }
 
 }

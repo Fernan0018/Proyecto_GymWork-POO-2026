@@ -169,12 +169,12 @@
         }
         .stat-total .stat-value { color: #fcd535; }
         .stat-operativas .stat-value { color: #5ddb6e; }
-        .stat-mantenimiento .stat-value { color: #ffb366; }
-        .stat-inactivas .stat-value { color: #ff6b7a; }
+        .stat-revision .stat-value { color: #fcd535; }
+        .stat-inactivas .stat-value { color: #dc3545; }
         .stat-total { border-top: 4px solid #fcd535; }
         .stat-operativas { border-top: 4px solid #5ddb6e; }
-        .stat-mantenimiento { border-top: 4px solid #ffb366; }
-        .stat-inactivas { border-top: 4px solid #ff6b7a; }
+        .stat-revision { border-top: 4px solid #fcd535; }
+        .stat-inactivas { border-top: 4px solid #dc3545; }
         .module-actions {
             display: flex;
             gap: 15px;
@@ -315,14 +315,14 @@
             color: #5ddb6e;
             border-color: rgba(40,167,69,0.4);
         }
-        .badge-mantenimiento {
-            background: rgba(253,126,20,0.12);
-            color: #ffb366;
-            border-color: rgba(253,126,20,0.4);
+        .badge-revision {
+            background: rgba(252,213,53,0.12);
+            color: #fcd535;
+            border-color: rgba(252,213,53,0.4);
         }
         .badge-inactiva {
             background: rgba(220,53,69,0.12);
-            color: #ff6b7a;
+            color: #dc3545;
             border-color: rgba(220,53,69,0.4);
         }
         .modal-overlay {
@@ -732,6 +732,9 @@
     <div class="dashboard-layout">
         <nav class="sidebar">
             <div class="sidebar-header">M&Oacute;DULOS</div>
+            <div class="sidebar-item" data-modulo="suscripciones">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Suscripciones"> Suscripciones
+            </div>
             <div class="sidebar-item" onclick="window.location.href='${pageContext.request.contextPath}/registro'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Registro.png" alt="Registro"> Registro
             </div>
@@ -743,6 +746,9 @@
             </div>
             <div class="sidebar-item" onclick="window.location.href='${pageContext.request.contextPath}/soporte'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Soporte.png" alt="Soporte"> Soporte
+            </div>
+            <div class="sidebar-item" data-modulo="admin">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Administracion.png" alt="M&oacute;dulo de Administraci&oacute;n"> M&oacute;dulo de Administraci&oacute;n
             </div>
         </nav>
 
@@ -761,10 +767,10 @@
                         <div class="stat-value">${totalOperativas}</div>
                         <div class="stat-label">Operativas</div>
                     </div>
-                    <div class="stat-card stat-mantenimiento">
+                    <div class="stat-card stat-revision">
                         <div class="stat-icon">&#9888;</div>
                         <div class="stat-value">${totalMantenimiento}</div>
-                        <div class="stat-label">En Mantenimiento</div>
+                        <div class="stat-label">En Revisi&oacute;n</div>
                     </div>
                     <div class="stat-card stat-inactivas">
                         <div class="stat-icon">&#10007;</div>
@@ -810,8 +816,8 @@
                                                 <c:when test="${m.estadoMaquina == 'Operativa'}">
                                                     <span class="badge badge-operativa">Operativa</span>
                                                 </c:when>
-                                                <c:when test="${m.estadoMaquina == 'Mantenimiento'}">
-                                                    <span class="badge badge-mantenimiento">Mantenimiento</span>
+                                                <c:when test="${m.estadoMaquina == 'Revisión'}">
+                                                    <span class="badge badge-revision">Revisi&oacute;n</span>
                                                 </c:when>
                                                 <c:when test="${m.estadoMaquina == 'Inactiva'}">
                                                     <span class="badge badge-inactiva">Inactiva</span>
@@ -871,7 +877,7 @@
                                 <select name="estadoMaquina" id="mEstado" required>
                                     <option value="">Seleccionar...</option>
                                     <option value="Operativa">Operativa</option>
-                                    <option value="Mantenimiento">Mantenimiento</option>
+                                    <option value="Revisi&oacute;n">Revisi&oacute;n</option>
                                     <option value="Inactiva">Inactiva</option>
                                 </select>
                             </div>
@@ -1006,8 +1012,9 @@
             var visibles = 0;
 
             for (var i = 0; i < filas.length; i++) {
-                var texto = filas[i].textContent.toLowerCase();
-                if (texto.indexOf(input) > -1) {
+                var celdas = filas[i].getElementsByTagName('td');
+                var nombreModelo = celdas.length > 1 ? celdas[1].textContent.toLowerCase() : '';
+                if (nombreModelo.indexOf(input) > -1) {
                     filas[i].style.display = '';
                     visibles++;
                 } else {
