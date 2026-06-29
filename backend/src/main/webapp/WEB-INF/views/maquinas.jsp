@@ -1012,9 +1012,8 @@
             var visibles = 0;
 
             for (var i = 0; i < filas.length; i++) {
-                var celdas = filas[i].getElementsByTagName('td');
-                var nombreModelo = celdas.length > 1 ? celdas[1].textContent.toLowerCase() : '';
-                if (nombreModelo.indexOf(input) > -1) {
+                var texto = filas[i].textContent.toLowerCase();
+                if (texto.indexOf(input) > -1) {
                     filas[i].style.display = '';
                     visibles++;
                 } else {
