@@ -427,7 +427,8 @@
             <div class="sidebar-item" data-modulo="sedes">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Sedes.png" alt="Sedes"> Sedes
             </div>
-            <div class="sidebar-item" data-modulo="maquinas">
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/maquinas'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Maquinas.png" alt="Estado de Máquinas"> Estado de Máquinas
             </div>
             <div class="sidebar-item" data-modulo="soporte">
