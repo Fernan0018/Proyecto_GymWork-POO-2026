@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +28,9 @@ public class SuscripcionesController {
     }
 
     @PostMapping("/suscripciones/guardar")
-    public ResponseEntity<Map<String, Object>> registrarSuscripcionWeb(@ModelAttribute("cliente") ClientesGW cliente) {
+    public Object registrarSuscripcionWeb(
+            @ModelAttribute("cliente") ClientesGW cliente,
+            @RequestParam(value = "ajax", defaultValue = "false") boolean ajax) {
         try {
             cliente.setIdSede(1);
             clientesRepository.save(cliente);
@@ -38,15 +41,21 @@ public class SuscripcionesController {
             );
             pagosRepository.save(pago);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            return ResponseEntity.ok(response);
+            if (ajax) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                return ResponseEntity.ok(response);
+            }
+            return "redirect:/administracion";
         } catch (Exception e) {
             e.printStackTrace();
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            if (ajax) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("error", e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+            return "redirect:/administracion?error=Error+al+registrar";
         }
     }
 }

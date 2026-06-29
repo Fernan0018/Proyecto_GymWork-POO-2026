@@ -25,6 +25,13 @@ public class ClientesGW {
     
     @Column(name = "Fecha_Registro")
     private Date fechaRegistro;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.fechaRegistro == null) {
+            this.fechaRegistro = new Date(System.currentTimeMillis());
+        }
+    }
     
     @Column(name = "Sexo")
     private String sexo;

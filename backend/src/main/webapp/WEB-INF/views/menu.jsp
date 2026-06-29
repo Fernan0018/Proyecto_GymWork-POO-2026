@@ -389,6 +389,28 @@
         .success-toast.show {
             display: block;
         }
+        .error-toast {
+            display: none;
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ff4444;
+            border: 2px solid #ff4444;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            z-index: 9999;
+            animation: fadeInOut 2.5s ease forwards;
+        }
+        .error-toast.show {
+            display: block;
+        }
         @keyframes fadeInOut {
             0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -661,33 +683,57 @@
         document.addEventListener('submit', function(e) {
             if (e.target && e.target.id === 'suscripcionForm') {
                 e.preventDefault();
-                var formData = new FormData(e.target);
+                var f = e.target;
+                var onlyLetters = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+                var onlyDigits = /^[0-9]+$/;
+                var nombre = f.querySelector('input[name="nombre"]');
+                var apPaterno = f.querySelector('input[name="apellidoPaterno"]');
+                var apMaterno = f.querySelector('input[name="apellidoMaterno"]');
+                var telefono = f.querySelector('input[name="telefono"]');
+                if (!onlyLetters.test(nombre.value.trim())) { mostrarAlerta('error','Nombre: solo letras'); return; }
+                if (!onlyLetters.test(apPaterno.value.trim())) { mostrarAlerta('error','Apellido Paterno: solo letras'); return; }
+                if (!onlyLetters.test(apMaterno.value.trim())) { mostrarAlerta('error','Apellido Materno: solo letras'); return; }
+                if (!onlyDigits.test(telefono.value.trim())) { mostrarAlerta('error','Telefono: solo numeros'); return; }
+                var formData = new FormData(f);
                 var params = new URLSearchParams(formData);
-                var mensajeDiv = document.getElementById('mensajeSuscripcion');
-                fetch('${pageContext.request.contextPath}/suscripciones/guardar', {
+                params.append('ajax', 'true');
+                fetch(f.action, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: params
                 })
-                .then(function(response) {
-                    if (!response.ok) {
-                        return response.json().then(function(data) {
-                            throw new Error(data.error || 'Error al registrar');
-                        });
-                    }
-                    return response.json();
+                .then(function(r) {
+                    if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Error'); });
+                    return r.json();
                 })
-                .then(function(data) {
-                    if (data.success) {
-                        mensajeDiv.innerHTML = '<p style="color: #00cc66; font-weight: bold;">Suscripci\u00f3n guardada con \u00e9xito</p>';
-                        e.target.reset();
+                .then(function(d) {
+                    if (d.success) {
+                        mostrarAlerta('exito', '¡Cliente registrado con éxito!');
+                        setTimeout(function() { location.reload(); }, 1500);
                     }
                 })
-                .catch(function(error) {
-                    mensajeDiv.innerHTML = '<p style="color: #ff3333; font-weight: bold;">Error: ' + error.message + '</p>';
+                .catch(function(err) {
+                    mostrarAlerta('error', 'Error: ' + err.message);
                 });
             }
         });
+
+        function mostrarAlerta(tipo, mensaje) {
+            var existing = document.querySelector('.' + tipo + '-toast.show');
+            if (existing) existing.classList.remove('show');
+            var toast = document.querySelector('.' + tipo + '-toast');
+            if (toast) {
+                toast.textContent = mensaje;
+                toast.classList.add('show');
+                setTimeout(function() { toast.classList.remove('show'); }, 2500);
+            } else {
+                var div = document.createElement('div');
+                div.className = tipo + '-toast show';
+                div.textContent = mensaje;
+                document.body.appendChild(div);
+                setTimeout(function() { div.remove(); }, 2500);
+            }
+        }
     </script>
     <script>
         (function() {
