@@ -41,6 +41,8 @@ public class LoginController {
         }
 
         session.setAttribute("username", username);
+        var datosOpt = datosAdminGWRepository.findByUsuarioUsername(username);
+        datosOpt.ifPresent(datos -> session.setAttribute("perfil", datos));
         return "redirect:/menu";
     }
 
@@ -51,11 +53,17 @@ public class LoginController {
             return "redirect:/login";
         }
 
-        var datosOpt = datosAdminGWRepository.findByUsuarioUsername(username);
-        if (datosOpt.isPresent()) {
-            DatosAdminGW datos = datosOpt.get();
-            model.addAttribute("perfil", datos);
-            int edad = Period.between(datos.getFechaNacimiento(), LocalDate.now()).getYears();
+        DatosAdminGW perfil = (DatosAdminGW) session.getAttribute("perfil");
+        if (perfil == null) {
+            var datosOpt = datosAdminGWRepository.findByUsuarioUsername(username);
+            if (datosOpt.isPresent()) {
+                perfil = datosOpt.get();
+                session.setAttribute("perfil", perfil);
+            }
+        }
+        if (perfil != null) {
+            model.addAttribute("perfil", perfil);
+            int edad = Period.between(perfil.getFechaNacimiento(), LocalDate.now()).getYears();
             model.addAttribute("edad", edad);
         }
 
@@ -71,6 +79,32 @@ public class LoginController {
                                     @RequestParam String correo,
                                     @RequestParam String telefono,
                                     RedirectAttributes redirectAttrs) {
+        if (nombre == null || nombre.trim().length() < 2) {
+            redirectAttrs.addFlashAttribute("error", "El nombre debe tener al menos 2 caracteres");
+            return "redirect:/menu";
+        }
+        if (apellidos == null || apellidos.trim().length() < 2) {
+            redirectAttrs.addFlashAttribute("error", "Los apellidos deben tener al menos 2 caracteres");
+            return "redirect:/menu";
+        }
+        if (correo == null || !correo.matches("^[\\w-.]+@[\\w-]+\\.[a-zA-Z]{2,}$")) {
+            redirectAttrs.addFlashAttribute("error", "Correo electrónico no válido");
+            return "redirect:/menu";
+        }
+        if (telefono == null || telefono.replaceAll("\\D", "").length() < 9) {
+            redirectAttrs.addFlashAttribute("error", "Teléfono debe tener al menos 9 dígitos");
+            return "redirect:/menu";
+        }
+        if (fechaNacimiento == null || fechaNacimiento.isEmpty()) {
+            redirectAttrs.addFlashAttribute("error", "La fecha de nacimiento es obligatoria");
+            return "redirect:/menu";
+        }
+        try {
+            LocalDate.parse(fechaNacimiento);
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("error", "Fecha de nacimiento no válida");
+            return "redirect:/menu";
+        }
         var datosOpt = datosAdminGWRepository.findById(dni);
         if (datosOpt.isPresent()) {
             DatosAdminGW datos = datosOpt.get();
