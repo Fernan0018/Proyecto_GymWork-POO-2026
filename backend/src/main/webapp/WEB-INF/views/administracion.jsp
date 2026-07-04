@@ -661,6 +661,9 @@
             <a class="sidebar-item active" href="${pageContext.request.contextPath}/administracion">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Administracion.png" alt="Módulo de Administración"> Módulo de Administración
             </a>
+            <a class="sidebar-item" href="${pageContext.request.contextPath}/validacion">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Control de Asistencia"> Control de Asistencia
+            </a>
         </nav>
 
         <div class="dashboard-main-content">

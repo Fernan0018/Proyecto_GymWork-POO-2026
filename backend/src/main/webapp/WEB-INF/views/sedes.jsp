@@ -675,6 +675,10 @@
                 onclick="window.location.href='${pageContext.request.contextPath}/administracion'">
                 <img class="sidebar-icon" src="${pageContext.request.contextPath}/Administracion.png" alt="Módulo de Administración"> Módulo de Administración
             </div>
+            <div class="sidebar-item"
+                onclick="window.location.href='${pageContext.request.contextPath}/validacion'">
+                <img class="sidebar-icon" src="${pageContext.request.contextPath}/Suscripciones.png" alt="Control de Asistencia"> Control de Asistencia
+            </div>
         </nav>
 
         <div class="dashboard-main-content">
