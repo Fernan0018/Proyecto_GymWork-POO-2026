@@ -1,2 +1,2 @@
 # Proyecto_GymWork
-Proyecto de PC4 para el curso POO (Bajense a Lopez)
+Proyecto Final del curso Programación Orientada a Objetos
